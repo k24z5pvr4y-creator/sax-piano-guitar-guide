@@ -36,12 +36,52 @@ export function renderFretboard(container, opts) {
           colorByNote = false, fullRange = false, onFret } = opts;
   const board = document.createElement("div");
   board.className = "fretboard";
-  const cols = () => `repeat(${FRETS + 1}, minmax(30px, 1fr))`;
 
   // Explicit-cells mode (a concrete chord voicing) or 3-notes-per-string
   // position box; either restricts which cells light up. The box/voicing itself
   // defines the octave, so the octave-range window is not applied to it.
   const active = cells || (position ? threeNPS(scalePcs, position) : null); // Set "s:fret"
+
+  // Zoom the rendered fret range to wherever notes actually are, omitting
+  // fret columns that are ENTIRELY empty (no string has a dot there) —
+  // whether that emptiness comes from the octave-range picker (a chosen
+  // pitch window is scattered across frets/strings, not a contiguous fret
+  // range) or from a Position box (only spans ~4-5 frets). Press-sync notes
+  // must stay visible even off-scale/off-window/off-box, so they always
+  // extend the crop. "Show entire fretboard" is the explicit opt-out.
+  //
+  // Fewer columns means CSS Grid's `1fr` tracks stretch each column wider to
+  // fill the container — first attempt at this left row height fixed at
+  // 30px, so a heavily cropped board turned into flat, wide ellipses with
+  // squashed text (reported as "unreadable"). Row height (and dot font size,
+  // via a CSS calc() off the same variable) now gets set AFTER layout to
+  // match the actual rendered column width, so cells stay roughly square
+  // and scale up together instead of just stretching sideways.
+  let fretStart = 0, fretEnd = FRETS;
+  if (!fullRange) {
+    let lo = null, hi = null;
+    const consider = f => { if (lo === null || f < lo) lo = f; if (hi === null || f > hi) hi = f; };
+    if (active) {
+      for (const key of active) consider(parseInt(key.split(":")[1], 10));
+    } else {
+      for (const open of TUNING) {
+        for (let f = 0; f <= FRETS; f++) {
+          const midi = open + f;
+          const pc = ((midi % 12) + 12) % 12;
+          if (scalePcs.has(pc) && midi >= lowMidi && midi <= highMidi) consider(f);
+        }
+      }
+    }
+    for (const midi of pressed) {
+      for (const open of TUNING) {
+        const f = midi - open;
+        if (f >= 0 && f <= FRETS) consider(f);
+      }
+    }
+    if (lo !== null) { fretStart = Math.max(0, lo - 1); fretEnd = Math.min(FRETS, hi + 1); }
+  }
+  const cols = () => `repeat(${fretEnd - fretStart + 1}, minmax(30px, 1fr))`;
+
   if (active) {
     let minFret = FRETS + 1;
     for (const key of active) {
@@ -66,7 +106,7 @@ export function renderFretboard(container, opts) {
     const ruler = document.createElement("div");
     ruler.className = "fb-ruler";
     ruler.style.gridTemplateColumns = cols();
-    for (let fret = 0; fret <= FRETS; fret++) {
+    for (let fret = fretStart; fret <= fretEnd; fret++) {
       const cell = document.createElement("div");
       cell.className = "fb-ruler-cell";
       cell.textContent = fret;
@@ -80,7 +120,7 @@ export function renderFretboard(container, opts) {
   grid.style.gridTemplateColumns = cols();
 
   TUNING.forEach((open, s) => {
-    for (let fret = 0; fret <= FRETS; fret++) {
+    for (let fret = fretStart; fret <= fretEnd; fret++) {
       const midi = open + fret;
       const pc = ((midi % 12) + 12) % 12;
       const cell = document.createElement("div");
@@ -108,6 +148,19 @@ export function renderFretboard(container, opts) {
   });
   board.appendChild(grid);
   container.appendChild(board);
+
+  // Match row height to the ACTUAL rendered column width (only knowable
+  // after layout) so cells stay roughly square when cropped to fewer
+  // columns, instead of the fixed 30px height stretching into flat wide
+  // ellipses. .fb-dot's font-size is a CSS calc() off this same variable.
+  requestAnimationFrame(() => {
+    const sample = grid.querySelector(".fb-cell");
+    if (!sample) return;
+    const colWidth = sample.getBoundingClientRect().width;
+    const rowH = Math.max(30, Math.min(80, Math.round(colWidth)));
+    grid.style.setProperty("--fb-row-h", `${rowH}px`);
+  });
+
   return board;
 }
 

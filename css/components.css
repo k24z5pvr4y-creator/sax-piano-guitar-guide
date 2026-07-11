@@ -121,7 +121,11 @@
    in the cell via .fb-dot's `inset`) land on it. Fret columns stay
    cell-bounded (border-right) since a fret genuinely IS the bounded region
    between two physical fret wires. */
-.fb-cell { position: relative; height: 30px; border-right: 1px solid var(--fret-wire); }
+/* --fb-row-h is set by fretboard.js after layout, matched to the actual
+   rendered column width so a cropped (fewer-column) board's cells stay
+   roughly square instead of the old fixed 30px height stretching into flat,
+   unreadable ellipses once columns widen to fill the row. */
+.fb-cell { position: relative; height: var(--fb-row-h, 30px); border-right: 1px solid var(--fret-wire); }
 .fb-cell::before {
   content: "";
   position: absolute; left: 0; right: 0; top: 50%;
@@ -134,7 +138,7 @@
   border-radius: 50%;
   background: var(--tone-accent-light);
   color: var(--tone-accent-ink);
-  font-size: 0.6rem;
+  font-size: clamp(0.6rem, calc(var(--fb-row-h, 30px) * 0.22), 0.9rem);
 }
 .fb-dot.is-root { background: var(--tone-accent); }
 /* root marker in per-letter color mode (Guitar Scales only) — ring instead of
