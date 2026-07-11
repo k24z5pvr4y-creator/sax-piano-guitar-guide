@@ -27,6 +27,10 @@ export const TUNING = [64, 59, 55, 50, 45, 40]; // high-e -> low-E, midi of open
 export const FRETS = 24;
 
 export function renderFretboard(container, opts) {
+  // fullRange: "show entire fretboard" — every chromatic note on every fret,
+  // ignoring both the octave-range window AND the current scale's pitch-class
+  // filter (not just the window; a scale-only chromatic-looking board was the
+  // original bug here).
   const { lowMidi, highMidi, rootPc, scalePcs = new Set(), pressed = new Set(),
           position = null, cells = null, label = null, showRuler = false,
           colorByNote = false, fullRange = false, onFret } = opts;
@@ -82,7 +86,7 @@ export function renderFretboard(container, opts) {
       const cell = document.createElement("div");
       cell.className = "fb-cell" + (fret === 0 ? " nut" : "");
       const inWindow = fullRange || (midi >= lowMidi && midi <= highMidi);
-      const inScale = box ? box.has(`${s}:${fret}`) : (scalePcs.has(pc) && inWindow);
+      const inScale = box ? box.has(`${s}:${fret}`) : (fullRange || (scalePcs.has(pc) && inWindow));
       const show = inScale || pressed.has(midi);
       if (show) {
         const dot = document.createElement("div");

@@ -151,6 +151,17 @@
 .chord-card h4 { margin: 0 0 8px; font-family: var(--font-ui); font-size: 0.9rem; }
 .roman { color: var(--ink-muted); font-family: var(--font-mono); }
 
+/* Piano ▸ Chords cards: a one-octave mini-keyboard, not interactive (no
+   onKey), so it can safely go below the 44px touch-target minimum here.
+   flex-shrink:0 + overflow-x:visible stop the flex row from squashing the
+   keyboard into its own internal scrollbar (its nested .keyboard has
+   overflow-x:auto, which reports a ~0 min-content width to the flex sizing
+   algorithm and otherwise lets the card collapse below the keys' real width). */
+.chord-card-piano { flex: 0 0 auto; min-width: 232px; }
+.chord-card-piano .keyboard { overflow-x: visible; }
+.chord-card-piano .pkey.white { flex-basis: 30px; }
+.chord-card-piano .pkey.black { width: 19px; }
+
 /* --- GUITAR CHORD-BOX DIAGRAM ------------------------------------------------
    The standard compact chord-chart box: X/O mute·open markers, a narrow
    fret window (not the whole 24-fret neck), string lines + fret wires, and

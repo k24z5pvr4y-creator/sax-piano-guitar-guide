@@ -60,7 +60,7 @@ export async function renderPianoChords(el, ctx) {
       const h = document.createElement("h3"); h.textContent = titleCase(tier); out.appendChild(h);
       const row = document.createElement("div"); row.className = "chord-row"; out.appendChild(row);
       for (const chord of chords) {
-        const card = document.createElement("div"); card.className = "chord-card";
+        const card = document.createElement("div"); card.className = "chord-card chord-card-piano";
         card.innerHTML = `<h4>${chordSymbol(state.root, chord)}</h4>`;
         renderKeyboard(card, { lowMidi: WIN_LOW, highMidi: WIN_HIGH, rootPc,
           scalePcs: new Set(pcSet(rootPc, chord.intervals)), pressed: new Set() });
@@ -80,7 +80,7 @@ export async function renderPianoChords(el, ctx) {
 
     triads.forEach(t => {
       const degRootPc = parseNote(t.rootName).pc;
-      const card = document.createElement("div"); card.className = "chord-card";
+      const card = document.createElement("div"); card.className = "chord-card chord-card-piano";
       card.innerHTML = `<h4><span class="roman">${t.roman}</span> ${t.rootName.replace(/\d+$/, "")}</h4>`;
       renderKeyboard(card, { lowMidi: WIN_LOW, highMidi: WIN_HIGH, rootPc: degRootPc,
         scalePcs: new Set(t.notes.map(n => ((n.midi % 12) + 12) % 12)), pressed: new Set() });

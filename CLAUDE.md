@@ -61,8 +61,11 @@ polluting the shared shape above:
 - `gtrPressed` — `Set<midi>`, Guitar ▸ Scales press-sync between the mini
   keyboard and the fretboard.
 - `fretFullRange` — Guitar ▸ Scales "show entire fretboard" checkbox; when
-  true, the fretboard ignores `octaveLow/octaveHigh` and lights every scale
-  tone across all 24 frets.
+  true, the fretboard ignores `octaveLow/octaveHigh` **and** the current
+  scale's pitch-class filter, lighting every chromatic note across all 24
+  frets (root still rings/highlights; scale membership stops mattering while
+  this is on). Originally shipped filtering to scale tones only — fixed after
+  a user report that the checkbox wasn't showing "every single note."
 - `saxPressedMidi` — Sax ▸ Translator's single selected key.
 - `saxScaleOctave` — Sax ▸ Scales' octave picker (1–6 only; see "Sax Scales"
   below for why this exists and how the default is chosen).
