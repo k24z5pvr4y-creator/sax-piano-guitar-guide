@@ -101,8 +101,20 @@
 .fb-ruler { display: grid; gap: 0; margin-bottom: 2px; }   /* cols set inline by renderer */
 .fb-ruler-cell { text-align: center; font: 0.65rem var(--font-ui); color: var(--ink-muted); }
 .fb-grid { display: grid; gap: 0; }         /* cols set inline by renderer */
-.fb-cell { position: relative; height: 30px; border-right: 1px solid var(--fret-wire);
-  border-bottom: 1px solid var(--border); }
+/* Each row is one STRING, which runs the neck as a single continuous line —
+   not a lane bounded top and bottom. A border-bottom per cell used to give 6
+   rows 7 boundary lines total, with notes floating in the band between two
+   of them instead of sitting on their own string's line; this draws exactly
+   one line per row, through its vertical center, so notes (already centered
+   in the cell via .fb-dot's `inset`) land on it. Fret columns stay
+   cell-bounded (border-right) since a fret genuinely IS the bounded region
+   between two physical fret wires. */
+.fb-cell { position: relative; height: 30px; border-right: 1px solid var(--fret-wire); }
+.fb-cell::before {
+  content: "";
+  position: absolute; left: 0; right: 0; top: 50%;
+  border-top: 1px solid var(--border);
+}
 .fb-cell.nut { border-right: 3px solid var(--nut); }
 .fb-dot {
   position: absolute; inset: 3px;
@@ -178,11 +190,22 @@
 .cbox-gridwrap { display: flex; align-items: flex-start; gap: 4px; }
 .cbox-startfret { font-size: 0.65rem; color: var(--ink-muted); white-space: nowrap;
   margin-top: 2px; }
-.cbox-grid { display: grid; width: 132px; height: 116px; border-left: 2px solid var(--fret-wire);
-  border-top: 1px solid var(--fret-wire); }
+/* Each column is one STRING, a continuous line down the neck — not a lane
+   bounded left and right. border-left on the grid plus border-right per cell
+   used to give 6 columns 7 boundary lines total, with dots centered in the
+   gap between two of them instead of sitting on their own string's line;
+   this draws exactly one line per column, through its horizontal center
+   (.cbox-dot is already centered at left:50%, so it lands right on it).
+   Fret rows stay cell-bounded (border-bottom + the grid's border-top) since
+   a fret genuinely IS the bounded region between two physical fret wires. */
+.cbox-grid { display: grid; width: 132px; height: 116px; border-top: 1px solid var(--fret-wire); }
 .cbox-grid.is-nut { border-top: 4px solid var(--nut); }
-.cbox-cell { position: relative; border-right: 2px solid var(--fret-wire);
-  border-bottom: 1px solid var(--fret-wire); }
+.cbox-cell { position: relative; border-bottom: 1px solid var(--fret-wire); }
+.cbox-cell::before {
+  content: "";
+  position: absolute; top: 0; bottom: 0; left: 50%;
+  border-left: 1px solid var(--fret-wire);
+}
 .cbox-dot { position: absolute; border-radius: 50%;
   background: var(--tone-accent-light); color: var(--tone-accent-ink);
   display: grid; place-items: center; font-size: 0.6rem; transform: translate(-50%, -50%);
