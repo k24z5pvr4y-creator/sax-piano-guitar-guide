@@ -11,8 +11,8 @@
 const BASE = {
   0: "#D55E00",  // C
   2: "#E69F00",  // D
-  4: "#F0E442",  // E
-  5: "#009E73",  // F
+  4: "#009E73",  // E — swapped with F
+  5: "#F0E442",  // F — swapped with E
   7: "#56B4E9",  // G
   9: "#0072B2",  // A
   11: "#CC79A7", // B
@@ -22,7 +22,7 @@ const FADES_FROM = { 1: 0, 3: 2, 6: 5, 8: 7, 10: 9 };
 const FADED = {
   0: "#f7c7a1",  // C#
   2: "#f7dda1",  // D#
-  5: "#a1f7e0",  // F#
+  5: "#f1eca7",  // F# — re-derived from F's new (yellow) base after the swap
   7: "#abd5ed",  // G#
   9: "#a1d8f7",  // A#
 };
