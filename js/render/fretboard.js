@@ -36,47 +36,12 @@ export function renderFretboard(container, opts) {
           colorByNote = false, fullRange = false, onFret } = opts;
   const board = document.createElement("div");
   board.className = "fretboard";
+  const cols = () => `repeat(${FRETS + 1}, minmax(30px, 1fr))`;
 
   // Explicit-cells mode (a concrete chord voicing) or 3-notes-per-string
   // position box; either restricts which cells light up. The box/voicing itself
   // defines the octave, so the octave-range window is not applied to it.
   const active = cells || (position ? threeNPS(scalePcs, position) : null); // Set "s:fret"
-
-  // Zoom the rendered fret range to wherever notes actually are, omitting
-  // fret columns that are ENTIRELY empty (no string has a dot there) —
-  // whether that emptiness comes from the octave-range picker (a chosen
-  // pitch window is scattered across frets/strings, not a contiguous fret
-  // range, so narrowing it used to just remove scattered dots across the
-  // same full-width board with no visible change) or from a Position box
-  // (a 3-notes-per-string box only spans ~4-5 frets but used to still render
-  // the full 24-fret width around it). Press-sync notes must stay visible
-  // even when off-scale/off-window/off-box, so they always extend the crop.
-  // "Show entire fretboard" is the explicit opt-out of any cropping.
-  let fretStart = 0, fretEnd = FRETS;
-  if (!fullRange) {
-    let lo = null, hi = null;
-    const consider = f => { if (lo === null || f < lo) lo = f; if (hi === null || f > hi) hi = f; };
-    if (active) {
-      for (const key of active) consider(parseInt(key.split(":")[1], 10));
-    } else {
-      for (const open of TUNING) {
-        for (let f = 0; f <= FRETS; f++) {
-          const midi = open + f;
-          const pc = ((midi % 12) + 12) % 12;
-          if (scalePcs.has(pc) && midi >= lowMidi && midi <= highMidi) consider(f);
-        }
-      }
-    }
-    for (const midi of pressed) {
-      for (const open of TUNING) {
-        const f = midi - open;
-        if (f >= 0 && f <= FRETS) consider(f);
-      }
-    }
-    if (lo !== null) { fretStart = Math.max(0, lo - 1); fretEnd = Math.min(FRETS, hi + 1); }
-  }
-  const cols = () => `repeat(${fretEnd - fretStart + 1}, minmax(30px, 1fr))`;
-
   if (active) {
     let minFret = FRETS + 1;
     for (const key of active) {
@@ -101,7 +66,7 @@ export function renderFretboard(container, opts) {
     const ruler = document.createElement("div");
     ruler.className = "fb-ruler";
     ruler.style.gridTemplateColumns = cols();
-    for (let fret = fretStart; fret <= fretEnd; fret++) {
+    for (let fret = 0; fret <= FRETS; fret++) {
       const cell = document.createElement("div");
       cell.className = "fb-ruler-cell";
       cell.textContent = fret;
@@ -115,7 +80,7 @@ export function renderFretboard(container, opts) {
   grid.style.gridTemplateColumns = cols();
 
   TUNING.forEach((open, s) => {
-    for (let fret = fretStart; fret <= fretEnd; fret++) {
+    for (let fret = 0; fret <= FRETS; fret++) {
       const midi = open + fret;
       const pc = ((midi % 12) + 12) % 12;
       const cell = document.createElement("div");
