@@ -5,27 +5,26 @@
 // else in the app. Not used anywhere but the guitar fretboard + the piano
 // relationship keyboard above it; every other view keeps the orange
 // root/scale-tone convention.
+//
+// Base palette is Okabe-Ito (colorblind-safe, chosen by the user).
 
 const BASE = {
-  0: "#c0392b",  // C
-  2: "#c87f0a",  // D
-  4: "#a68b0a",  // E
-  5: "#1e8449",  // F
-  7: "#2471a3",  // G
-  9: "#7d3c98",  // A
-  11: "#bf2290", // B — was #c2185b, a raspberry-red only ~29° of hue away from
-                 // C's brick red (they read as near-identical at a glance);
-                 // shifted toward fuchsia/magenta for clear separation from
-                 // both C and A.
+  0: "#D55E00",  // C
+  2: "#E69F00",  // D
+  4: "#F0E442",  // E
+  5: "#009E73",  // F
+  7: "#56B4E9",  // G
+  9: "#0072B2",  // A
+  11: "#CC79A7", // B
 };
 // sharp pitch class -> the natural pitch class it fades from
 const FADES_FROM = { 1: 0, 3: 2, 6: 5, 8: 7, 10: 9 };
 const FADED = {
-  0: "#e3a6a0",  // C#
-  2: "#e6c591",  // D#
-  5: "#9ac8ad",  // F#
-  7: "#9cbfd6",  // G#
-  9: "#c4a7d1",  // A#
+  0: "#f7c7a1",  // C#
+  2: "#f7dda1",  // D#
+  5: "#a1f7e0",  // F#
+  7: "#abd5ed",  // G#
+  9: "#a1d8f7",  // A#
 };
 
 export function noteColor(pc) {
@@ -33,9 +32,22 @@ export function noteColor(pc) {
   return BASE[p] ?? FADED[FADES_FROM[p]];
 }
 
-// naturals are saturated enough for white text; faded sharps are pale and
-// need dark text to stay readable.
+// Text color is picked by actual contrast against the fill, not a blanket
+// "naturals get white / sharps get dark" assumption — this palette's yellows
+// and light blues (E, D, G) fail contrast badly with white (as low as 1.3:1
+// for E) despite being "base" colors, unlike the old palette where every
+// base happened to be dark enough for white text.
+function relLuminance(hex) {
+  const c = hex.slice(1).match(/../g).map(h => parseInt(h, 16) / 255)
+    .map(v => v <= 0.04045 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4));
+  return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2];
+}
+function contrastRatio(hexA, hexB) {
+  const lA = relLuminance(hexA), lB = relLuminance(hexB);
+  const lighter = Math.max(lA, lB), darker = Math.min(lA, lB);
+  return (lighter + 0.05) / (darker + 0.05);
+}
 export function noteTextColor(pc) {
-  const p = ((pc % 12) + 12) % 12;
-  return BASE[p] ? "#ffffff" : "#1c1a17";
+  const bg = noteColor(((pc % 12) + 12) % 12);
+  return contrastRatio(bg, "#ffffff") >= contrastRatio(bg, "#1c1a17") ? "#ffffff" : "#1c1a17";
 }
