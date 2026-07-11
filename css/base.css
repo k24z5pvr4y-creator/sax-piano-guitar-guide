@@ -36,6 +36,18 @@ button {
   padding: 0 14px;
   cursor: pointer;
 }
+/* Native <select> only had button's touch-target rules by coincidence of a
+   shared selector list — it was never actually given the min-height, so
+   every dropdown in the app (root/scale/octave/position pickers) rendered
+   at ~20px tall, well under the 44px floor this file claims to enforce. */
+select {
+  min-height: var(--touch-min);
+  border: 1px solid var(--border-strong);
+  background: var(--surface-raised);
+  border-radius: var(--radius);
+  padding: 0 8px;
+  cursor: pointer;
+}
 button:focus-visible, a:focus-visible, select:focus-visible {
   outline: 2px solid var(--tone-accent);
   outline-offset: 2px;

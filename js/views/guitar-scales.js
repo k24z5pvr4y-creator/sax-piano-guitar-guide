@@ -41,7 +41,7 @@ export async function renderGuitarScales(el, ctx) {
     <div class="controls">
       <label>Scale <select id="scaleSel"></select></label>
       <label>Position <select id="posSel"></select></label>
-      <label><input type="checkbox" id="fullRange" ${state.fretFullRange ? "checked" : ""} /> Show entire fretboard</label>
+      <label class="chk-label"><input type="checkbox" id="fullRange" ${state.fretFullRange ? "checked" : ""} /> Show entire fretboard</label>
     </div>
     <h3>Piano relationship</h3>
     <div id="kbwrap"></div>

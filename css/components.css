@@ -33,6 +33,18 @@
   margin-bottom: 20px;
 }
 .controls label { font-family: var(--font-ui); font-size: 0.85rem; color: var(--ink-muted); }
+/* Checkbox labels: the native checkbox box is tiny (~13px) and a bare label
+   with no sizing only gives you its text line-height (~20px) to tap — well
+   under the 44px floor. Labels already toggle their checkbox on click by
+   native semantics, so making the whole label a properly tall flex row (not
+   just enlarging the checkbox glyph) gives a real touch target. */
+.chk-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: var(--touch-min);
+}
+.chk-label input[type="checkbox"] { width: 20px; height: 20px; cursor: pointer; }
 .seg {
   display: inline-flex;
   border: 1px solid var(--border-strong);
