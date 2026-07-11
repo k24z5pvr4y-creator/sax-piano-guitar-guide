@@ -4,20 +4,32 @@
 // to change its fingering when an alternate exists."
 //
 // SPEC
-//  - Root + scale + Alto/Tenor + Octave controls (concert pitch; the horn's
-//    transposing mapping applies here the same as on the translator). Realize
-//    exactly ONE octave of the scale — root up to the next occurrence of the
-//    root, e.g. root A shows every fingering from A up to the next A — sized
-//    to fit without horizontal scrolling. The octave picker matters because a
+//  - Root + scale + Alto/Tenor + Octave + Octaves-shown controls (concert
+//    pitch; the horn's transposing mapping applies here the same as on the
+//    translator). Realizes ONE octave of the scale per row — root up to the
+//    next occurrence of the root, e.g. root A shows every fingering from A up
+//    to the next A — sized to fit without horizontal scrolling; "Octaves
+//    shown" stacks that many consecutive one-octave rows, each on its own
+//    line, starting at the picked octave. The Octave picker matters because a
 //    fixed octave (e.g. always starting at octave 4) can land right at or
 //    past the top of the horn's range for some roots — root A at octave 4
 //    already exceeds an alto's concert ceiling (F5) — so the octave has to be
-//    a real, user-adjustable choice, not hardcoded.
-//  - Render the scale as an ordered strip of fingering cards, left→right
+//    a real, user-adjustable choice, not hardcoded. Octaves-shown matters for
+//    the SAME reason from the other direction: a single one-octave window's
+//    start point is tied to (root, octave), so for many roots even the
+//    lowest selectable octave still doesn't reach the instrument's true
+//    bottom notes (e.g. root A at the lowest alto octave starts at concert
+//    A2, never touching written A2-F3 down at concert C2-G#2, even though
+//    those fingerings exist and are correct) — stacking multiple octaves
+//    makes the union of what's visible cover more of the real range
+//    regardless of which root is selected, instead of only ever showing a
+//    single reachable slice.
+//  - Render each octave as an ordered strip of fingering cards, left→right
 //    ascending. Each card shows sax (written) notation on TOP and concert
 //    pitch on the BOTTOM, using friendly "Variation N" labels — never the raw
 //    JSON note id. Clicking a card cycles to that note's alternates.
-//  - Reuse rankByMovement so the *sequence* prefers low finger movement.
+//  - Reuse rankByMovement so the *sequence* prefers low finger movement,
+//    continuing the movement-cost chain across octave rows.
 import { rootPicker } from "../render/controls.js";
 import { loadScales, getScale, byCategory, scaleNotes } from "../theory/scales.js";
 import { loadFingerings, fingeringsFor, rankByMovement, renderSaxCard, variationLabel } from "../render/sax.js";
@@ -64,6 +76,15 @@ export async function renderSaxScales(el, ctx) {
     state.saxScaleOctave = best;
   }
 
+  // How many consecutive one-octave rows to stack, starting at
+  // saxScaleOctave. Capped to how many octave slots this instrument actually
+  // has (octHigh - octLow + 1) — offering "show 8 octaves" on a horn with 4
+  // octaves of range would just mean the extra rows are entirely
+  // out-of-range placeholders.
+  const maxCount = octHigh - octLow + 1;
+  state.saxOctaveCount ??= 1;
+  if (state.saxOctaveCount > maxCount) state.saxOctaveCount = maxCount;
+
   el.innerHTML = `<p class="eyebrow">Saxophone</p><h1>Scales</h1>
     <div class="controls sax-toggle">
       <div class="seg" id="axtog">
@@ -75,8 +96,9 @@ export async function renderSaxScales(el, ctx) {
     <div class="controls">
       <label>Scale <select id="scaleSel"></select></label>
       <label>Octave <select id="octSel"></select></label>
+      <label>Octaves shown <select id="octCountSel"></select></label>
     </div>
-    <div class="sax-strip compact" id="strip"></div>`;
+    <div id="strips"></div>`;
 
   el.querySelector("#axtog").addEventListener("click", e => {
     const ax = e.target.dataset.ax; if (!ax) return;
@@ -86,22 +108,39 @@ export async function renderSaxScales(el, ctx) {
   ctl.append(rootPicker(state, () => renderSaxScales(el, ctx)));
   fillScaleSelect(el.querySelector("#scaleSel"), scales, state, () => renderSaxScales(el, ctx));
   fillOctaveSelect(el.querySelector("#octSel"), state, octLow, octHigh, () => renderSaxScales(el, ctx));
+  fillOctaveCountSelect(el.querySelector("#octCountSel"), state, maxCount, () => renderSaxScales(el, ctx));
 
-  // exactly one octave: root up to the next occurrence of the root, at the
-  // user-chosen octave.
-  const rootLow = parseNote(state.root + state.saxScaleOctave).midi;
-  const notes = scaleNotes(state.root, scale, rootLow, rootLow + 12);
-  const strip = el.querySelector("#strip");
-  strip.innerHTML = "";
-  if (!notes.length) { strip.innerHTML = `<p class="cap">No notes in this range.</p>`; return; }
+  // One octave per row — root up to the next occurrence of the root — with
+  // "Octaves shown" stacking that many rows, each its own line, starting at
+  // the picked octave and moving upward.
+  const strips = el.querySelector("#strips");
+  strips.innerHTML = "";
   let prevReq = [];
-  for (const n of notes) {
-    const written = midiToName(concertToWrittenMidi(n.midi, state.instrument));
-    const cands = rankByMovement(fingeringsFor(entries, written), prevReq);
-    if (!cands.length) { renderOutOfRange(strip, n.name, written); continue; }
-    renderCyclingCard(strip, cands, n.name);
-    prevReq = cands[0].required; // sequence prefers low movement off the default
+  for (let i = 0; i < state.saxOctaveCount; i++) {
+    const rowOctave = state.saxScaleOctave + i;
+    const rootLow = parseNote(state.root + rowOctave).midi;
+    const notes = scaleNotes(state.root, scale, rootLow, rootLow + 12);
+    if (!notes.length) continue;
+
+    if (state.saxOctaveCount > 1) {
+      const heading = document.createElement("p");
+      heading.className = "cap";
+      heading.style.margin = i === 0 ? "0 0 4px" : "16px 0 4px";
+      heading.textContent = `Octave ${rowOctave}`;
+      strips.appendChild(heading);
+    }
+    const strip = document.createElement("div");
+    strip.className = "sax-strip compact";
+    strips.appendChild(strip);
+    for (const n of notes) {
+      const written = midiToName(concertToWrittenMidi(n.midi, state.instrument));
+      const cands = rankByMovement(fingeringsFor(entries, written), prevReq);
+      if (!cands.length) { renderOutOfRange(strip, n.name, written); continue; }
+      renderCyclingCard(strip, cands, n.name);
+      prevReq = cands[0].required; // sequence prefers low movement off the default, across rows too
+    }
   }
+  if (!strips.children.length) strips.innerHTML = `<p class="cap">No notes in this range.</p>`;
 }
 
 // One scale note = one card cycling through its alternates on click/tap.
@@ -149,6 +188,16 @@ function fillOctaveSelect(sel, state, octLow, octHigh, onChange) {
     sel.appendChild(opt);
   }
   sel.addEventListener("change", () => { state.saxScaleOctave = parseInt(sel.value, 10); onChange(); });
+}
+
+function fillOctaveCountSelect(sel, state, maxCount, onChange) {
+  for (let n = 1; n <= maxCount; n++) {
+    const opt = document.createElement("option");
+    opt.value = n; opt.textContent = n;
+    if (n === state.saxOctaveCount) opt.selected = true;
+    sel.appendChild(opt);
+  }
+  sel.addEventListener("change", () => { state.saxOctaveCount = parseInt(sel.value, 10); onChange(); });
 }
 
 function fillScaleSelect(sel, scales, state, onChange) {

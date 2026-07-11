@@ -79,6 +79,11 @@ polluting the shared shape above:
   tenor: 1–5 — derived each render from the real fingering data's producible
   concert range, not a hardcoded guess). See "Sax Scales" below for why the
   picker exists and how the default is chosen.
+- `saxOctaveCount` — Sax ▸ Scales' "Octaves shown" picker (default 1); stacks
+  that many consecutive one-octave rows starting at `saxScaleOctave`, each on
+  its own line. Capped to the instrument's total octave slots
+  (`octHigh - octLow + 1`) so it can't offer more rows than the horn has
+  range for.
 
 Each view module exports `render<Name>(el, { state, navigate })` and mounts
 into `#view`.
@@ -108,21 +113,35 @@ scale fill). Clicking shows the movement-cheapest fingering plus all
 alternates, captioned with friendly `"<note> Variation N"` labels — never a
 raw JSON id like `C#4-alt2`. Alto/Tenor toggle changes the concert mapping.
 
-**Sax ▸ Scales** (`/sax/scales`) — Root + Scale + Alto/Tenor + **Octave**
-controls, realizing exactly one octave (root up to the next occurrence of the
-root) as a strip of fingering cards sized to fit without horizontal scrolling.
-The Octave picker (bounded to what the current instrument can actually
-produce — alto: 2–5, tenor: 1–5, not a fixed guess) exists because a
-hardcoded octave can push part of the scale outside what the instrument can
-play — e.g. root A at a fixed octave 4 puts the window's top note (A5, midi
-81) 4 semitones past an alto's concert ceiling (F5, midi 77), so the highest
-few scale degrees rendered as out-of-range placeholders with no way to pick a
-lower, fully-playable octave. The default octave is chosen
-automatically (closest to the middle of the current instrument's playable
-range) and re-picked if a root/instrument change makes the stored choice
-badly wrong, but is otherwise sticky and user-overridable. Cards show written
-(sax) notation on top, concert pitch on the bottom; click a card to cycle its
-alternates.
+**Sax ▸ Scales** (`/sax/scales`) — Root + Scale + Alto/Tenor + **Octave** +
+**Octaves shown** controls, realizing one octave per row (root up to the next
+occurrence of the root) as a strip of fingering cards sized to fit without
+horizontal scrolling; "Octaves shown" (default 1) stacks that many rows, each
+on its own line, starting at the picked octave and moving upward, with a
+small "Octave N" heading per row once more than one is shown. The Octave
+picker (bounded to what the current instrument can actually produce — alto:
+2–5, tenor: 1–5, not a fixed guess) exists because a hardcoded octave can
+push part of the scale outside what the instrument can play — e.g. root A at
+a fixed octave 4 puts the window's top note (A5, midi 81) 4 semitones past an
+alto's concert ceiling (F5, midi 77), so the highest few scale degrees
+rendered as out-of-range placeholders with no way to pick a lower,
+fully-playable octave. "Octaves shown" exists for the same reason from the
+other direction: a single one-octave window's start point is tied to (root,
+octave), so for many roots even the lowest selectable octave still doesn't
+reach the instrument's true bottom notes — e.g. root A at alto's lowest
+octave starts at concert A2 and can never show written A2–F3 (concert
+C2–G#2), even though those fingerings are correct and exist in the data;
+that's not a bug, an A-rooted scale genuinely has nothing below the lowest
+playable A, but a **C**-rooted scale at the lowest octave does reach those
+notes. Stacking rows makes more of an instrument's real range visible at
+once instead of hunting root-by-root for the one window that happens to
+reach a given note. The default octave is chosen automatically (closest to
+the middle of the current instrument's playable range) and re-picked if a
+root/instrument change makes the stored choice badly wrong, but is otherwise
+sticky and user-overridable; "Octaves shown" is capped to the instrument's
+total octave slots. Cards show written (sax) notation on top, concert pitch
+on the bottom; click a card to cycle its alternates; the movement-cost chain
+(`rankByMovement`) continues across octave rows, not just within one.
 
 **Piano ▸ Scales** (`/piano/scales`) — Root + Scale only, no octave picker.
 Fixed 2-octave keyboard, no per-key octave-number label (`showCLabel: false`).
