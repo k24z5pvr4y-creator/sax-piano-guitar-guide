@@ -20,12 +20,18 @@ const BASE = {
 };
 // sharp pitch class -> the natural pitch class it fades from
 const FADES_FROM = { 1: 0, 3: 2, 6: 5, 8: 7, 10: 9 };
+// Lightened but NOT desaturated down to washed-out pastels — G#/A# used to
+// both land around 30-40% saturation once lightened, and at that low a
+// saturation a ~78° hue gap (blue vs violet) stops reading as visually
+// distinct; they looked like the same pale blue. Keeping saturation closer
+// to each base's own (or a 50% floor) preserves the hue difference instead
+// of flattening every sharp toward the same washed-out pastel.
 const FADED = {
-  0: "#e3a6a0",  // C#
-  2: "#e6c591",  // D#
-  5: "#9ac8ad",  // F#
-  7: "#9cbfd6",  // G#
-  9: "#c4a7d1",  // A#
+  0: "#e1837a",  // C#
+  2: "#f7be64",  // D#
+  5: "#7ae1a5",  // F#
+  7: "#79b8e1",  // G#
+  9: "#be85d6",  // A#
 };
 
 export function noteColor(pc) {
