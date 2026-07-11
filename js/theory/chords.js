@@ -42,6 +42,28 @@ export function chordSymbol(rootLetterName, chord) { return `${rootLetterName}${
 // (pentatonic/symmetric/bebop) stack thirds *within the scale* instead.
 const ROMAN = ["I","II","III","IV","V","VI","VII"];
 
+// Triad quality from the root->3rd and root->5th interval in semitones —
+// covers every quality the every-other-scale-tone stack in diatonicTriads
+// can actually produce, across 7-note diatonic scales (maj/min/dim/aug) and
+// non-heptatonic scales (pentatonic stacks land on sus2/sus4). Anything else
+// (whole-tone/symmetric scales can stack oddities) falls back to a bare
+// major-shaped label rather than guessing.
+function triadQuality(thirdIv, fifthIv) {
+  if (thirdIv === 4 && fifthIv === 7) return { suffix: "",     roman: "upper"    }; // major
+  if (thirdIv === 3 && fifthIv === 7) return { suffix: "m",    roman: "lower"    }; // minor
+  if (thirdIv === 3 && fifthIv === 6) return { suffix: "dim",  roman: "lowerDim" }; // diminished
+  if (thirdIv === 4 && fifthIv === 8) return { suffix: "aug",  roman: "upperAug" }; // augmented
+  if (thirdIv === 2 && fifthIv === 7) return { suffix: "sus2", roman: "upper"    };
+  if (thirdIv === 5 && fifthIv === 7) return { suffix: "sus4", roman: "upper"    };
+  return { suffix: "", roman: "upper" };
+}
+function formatRoman(base, roman) {
+  if (roman === "lower") return base.toLowerCase();
+  if (roman === "lowerDim") return base.toLowerCase() + "°";
+  if (roman === "upperAug") return base + "+";
+  return base;
+}
+
 // Simple diatonic triads: stack every-other scale tone (root, +2 steps, +4
 // steps) for each degree. Works for any scale length (not just 7-note
 // diatonic scales) since it only needs the ordered pitch-class list, not a
@@ -65,9 +87,14 @@ export function diatonicTriads(orderedPcs, rootName, spelling = "sharp") {
   const out = [];
   for (let deg = 0; deg < n; deg++) {
     const chordTones = [deg, deg + 2, deg + 4].map(i => tones[i]);
+    const thirdIv = ((chordTones[1] - chordTones[0]) % 12 + 12) % 12;
+    const fifthIv = ((chordTones[2] - chordTones[0]) % 12 + 12) % 12;
+    const q = triadQuality(thirdIv, fifthIv);
+    const baseRoman = ROMAN[deg] ?? String(deg + 1);
     out.push({
       degree: deg,
-      roman: ROMAN[deg] ?? String(deg + 1),
+      roman: formatRoman(baseRoman, q.roman),
+      qualitySuffix: q.suffix,
       rootName: midiToName(chordTones[0], spelling),
       notes: chordTones.map(m => ({ midi: m, name: midiToName(m, spelling) })),
     });

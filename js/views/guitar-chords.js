@@ -69,12 +69,13 @@ export async function renderGuitarChords(el, ctx) {
     const triads = diatonicTriads(scalePcs(state.root, scale), state.root + "3");
 
     const heading = document.createElement("p"); heading.className = "cap";
-    heading.textContent = `${state.root} ${scale.name} — diatonic triads.`;
+    heading.textContent = `${state.root} ${scale.name} — chord progression.`;
     out.appendChild(heading);
     const row = document.createElement("div"); row.className = "chord-row"; out.appendChild(row);
 
     triads.forEach(t => {
-      const romanLabel = `${t.roman} ${t.rootName.replace(/\d+$/, "")}`;
+      const letter = t.rootName.replace(/\d+$/, "");
+      const romanLabel = `${t.roman} ${letter}${t.qualitySuffix}`;
       const rootPc = parseNote(t.rootName).pc;
       const noteNames = t.notes.map(n => n.name.replace(/-?\d+$/, ""));
       const chordPcs = new Set(t.notes.map(n => ((n.midi % 12) + 12) % 12));
@@ -120,16 +121,25 @@ function findVoicings(rootPc, chordPcs, maxResults = 3) {
     const v = bestVoicingAt(base, rootPc, tones, essentials, fullCoverage);
     if (v) candidates.push(v);
   }
-  // dedupe identical fret signatures
+  // dedupe identical fret signatures, ranking by LOWEST POSITION FIRST (score
+  // only breaks ties between fingerings at essentially the same position).
+  // This used to sort by score first, which favored shapes that used more
+  // strings (the score formula rewards string count) over the actual lowest,
+  // most idiomatic position — e.g. it would skip the standard open Am shape
+  // (X02210, fret 1) in favor of an ugly 6-string doubled-note shape up at
+  // fret 2 just because it sounded one more string. Guitarists reach for the
+  // lowest playable position first; the score should only settle ties within
+  // that position, not override it.
   const seen = new Set();
   const uniq = [];
-  for (const c of candidates.sort((a, b) => b.score - a.score)) {
+  for (const c of candidates.sort((a, b) => a.minFret - b.minFret || b.score - a.score)) {
     if (seen.has(c.sig)) continue;
     seen.add(c.sig); uniq.push(c);
   }
-  // pick up to N distinct positions, greedily from best score, keeping the
-  // starting frets at least 2 apart so the results are genuinely different
-  // shapes across the neck (the lowest playable position, then higher ones).
+  // pick up to N distinct positions, greedily from lowest position, keeping
+  // the starting frets at least 2 apart so the results are genuinely
+  // different shapes across the neck (the lowest playable position, then
+  // higher ones).
   const chosen = [];
   for (const c of uniq) {
     if (chosen.some(x => Math.abs(x.minFret - c.minFret) < 2)) continue;
@@ -138,7 +148,13 @@ function findVoicings(rootPc, chordPcs, maxResults = 3) {
   }
   return chosen.sort((a, b) => a.minFret - b.minFret).map(c => ({
     cells: c.cells,
-    label: c.minFret === 0 ? "open" : `fret ${c.minFret}`,
+    // "open" for the true first-position shape (base 0 — frets 0-3, e.g.
+    // Am's X02210) only. Using hasOpen here instead would mislabel every
+    // higher-position voicing too: chords like Am/C/Dm/Em/G share several
+    // chord tones with the open strings, so a barre shape anchored at fret 5
+    // can still happen to ring an open string alongside it — that's still a
+    // "fret 5" shape to a guitarist, not a second "open" chord.
+    label: c.base === 0 ? "open" : `fret ${c.minFret}`,
   }));
 }
 

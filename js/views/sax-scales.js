@@ -36,6 +36,11 @@ export async function renderSaxScales(el, ctx) {
     .filter(e => !/-alt\d*$/.test(e.note))
     .map(e => writtenToConcertMidi(e.note, state.instrument));
   const rangeLow = Math.min(...producible), rangeHigh = Math.max(...producible);
+  // Octave-select bounds: the actual octave numbers this instrument can
+  // produce (alto: 2-5, tenor: 1-5), not an arbitrary fixed guess — a picker
+  // that let you choose an octave the horn can't play (e.g. alto's nonexistent
+  // octave 6) just filled the whole strip with "out of range" placeholders.
+  const octLow = Math.floor(rangeLow / 12) - 1, octHigh = Math.floor(rangeHigh / 12) - 1;
 
   // Sticky across renders (a deliberate octave pick is respected even if it
   // pushes some notes out of range at the edges), but re-picked automatically
@@ -44,13 +49,15 @@ export async function renderSaxScales(el, ctx) {
   // silently put the whole scale past the alto's ceiling with no way out
   // except manually hunting for a better octave.
   const rootAtStored = state.saxScaleOctave == null ? null : parseNote(state.root + state.saxScaleOctave).midi;
-  const badlyOutOfRange = rootAtStored != null && (rootAtStored < rangeLow - 12 || rootAtStored > rangeHigh + 12);
+  const badlyOutOfRange = rootAtStored != null &&
+    (rootAtStored < rangeLow - 12 || rootAtStored > rangeHigh + 12 ||
+     state.saxScaleOctave < octLow || state.saxScaleOctave > octHigh);
   if (state.saxScaleOctave == null || badlyOutOfRange) {
     // smart default: whichever octave puts the root closest to the middle
     // of what this instrument can actually play.
     const mid = (rangeLow + rangeHigh) / 2;
-    let best = 4, bestDist = Infinity;
-    for (let o = 1; o <= 6; o++) {
+    let best = octLow, bestDist = Infinity;
+    for (let o = octLow; o <= octHigh; o++) {
       const d = Math.abs(parseNote(state.root + o).midi - mid);
       if (d < bestDist) { bestDist = d; best = o; }
     }
@@ -78,7 +85,7 @@ export async function renderSaxScales(el, ctx) {
   const ctl = el.querySelector("#ctl");
   ctl.append(rootPicker(state, () => renderSaxScales(el, ctx)));
   fillScaleSelect(el.querySelector("#scaleSel"), scales, state, () => renderSaxScales(el, ctx));
-  fillOctaveSelect(el.querySelector("#octSel"), state, () => renderSaxScales(el, ctx));
+  fillOctaveSelect(el.querySelector("#octSel"), state, octLow, octHigh, () => renderSaxScales(el, ctx));
 
   // exactly one octave: root up to the next occurrence of the root, at the
   // user-chosen octave.
@@ -134,8 +141,8 @@ function renderOutOfRange(strip, concertName, written) {
   strip.appendChild(ph);
 }
 
-function fillOctaveSelect(sel, state, onChange) {
-  for (let o = 1; o <= 6; o++) {
+function fillOctaveSelect(sel, state, octLow, octHigh, onChange) {
+  for (let o = octLow; o <= octHigh; o++) {
     const opt = document.createElement("option");
     opt.value = o; opt.textContent = o;
     if (o === state.saxScaleOctave) opt.selected = true;

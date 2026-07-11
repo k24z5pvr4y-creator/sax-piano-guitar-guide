@@ -11,7 +11,7 @@
 //    "relationship between piano and guitar" feature. Same scalePcs feed both.
 import { rootPicker, octaveRangePicker } from "../render/controls.js";
 import { loadScales, getScale, byCategory, scalePcs } from "../theory/scales.js";
-import { renderFretboard } from "../render/fretboard.js";
+import { renderFretboard, TUNING, FRETS } from "../render/fretboard.js";
 import { renderKeyboard } from "../render/keyboard.js";
 import { parseNote } from "../theory/pitch.js";
 
@@ -21,6 +21,13 @@ import { parseNote } from "../theory/pitch.js";
 // octave numbers since it's illustrating pitch-class relationships, not a
 // specific register.
 const REL_LOW = parseNote("C4").midi, REL_HIGH = parseNote("B5").midi;
+
+// Octave-picker bounds: the actual range standard tuning + 24 frets can
+// produce (open low E to the 24th fret on high E), not a generic 0-8
+// piano-style range — the picker used to offer octaves the guitar can't
+// physically reach.
+const GTR_MIN_OCTAVE = Math.floor(Math.min(...TUNING) / 12) - 1;
+const GTR_MAX_OCTAVE = Math.floor((Math.max(...TUNING) + FRETS) / 12) - 1;
 
 export async function renderGuitarScales(el, ctx) {
   const { state } = ctx;
@@ -43,7 +50,8 @@ export async function renderGuitarScales(el, ctx) {
 
   const ctl = el.querySelector("#ctl");
   ctl.append(rootPicker(state, () => renderGuitarScales(el, ctx)),
-             octaveRangePicker(state, () => renderGuitarScales(el, ctx)));
+             octaveRangePicker(state, () => renderGuitarScales(el, ctx),
+               { minOctave: GTR_MIN_OCTAVE, maxOctave: GTR_MAX_OCTAVE }));
   fillScaleSelect(el.querySelector("#scaleSel"), scales, state, () => renderGuitarScales(el, ctx));
   fillPosSelect(el.querySelector("#posSel"), state, () => renderGuitarScales(el, ctx));
   el.querySelector("#fullRange").addEventListener("change", e => {

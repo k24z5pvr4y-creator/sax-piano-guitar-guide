@@ -18,12 +18,12 @@ export function rootPicker(state, onChange) {
   return wrap;
 }
 
-export function octaveRangePicker(state, onChange) {
+export function octaveRangePicker(state, onChange, { minOctave = 0, maxOctave = 8 } = {}) {
   const wrap = document.createElement("label");
   wrap.textContent = "Octaves ";
   const mk = (val, key) => {
     const s = document.createElement("select");
-    for (let o = 0; o <= 8; o++) {
+    for (let o = minOctave; o <= maxOctave; o++) {
       const opt = document.createElement("option");
       opt.value = o; opt.textContent = o;
       if (o === val) opt.selected = true;
