@@ -59,6 +59,14 @@ export async function renderGuitarScales(el, ctx) {
   });
 
   const pcs = new Set(scalePcs(state.root, scale));
+  // "Show entire fretboard" bypasses the scale filter on the fretboard (see
+  // fretboard.js); the piano-relationship keyboard shares that same scalePcs
+  // feed by design (CLAUDE.md: "two linked displays sharing one scalePcs"),
+  // so it needs the same chromatic override — otherwise the fretboard lights
+  // every note while the keyboard above it still only fills scale tones,
+  // which reads as the keyboard being stuck/broken.
+  const ALL_PCS = new Set([0,1,2,3,4,5,6,7,8,9,10,11]);
+  const kbPcs = state.fretFullRange ? ALL_PCS : pcs;
   const low = (state.octaveLow + 1) * 12, high = (state.octaveHigh + 1) * 12 + 11;
   const rootPc = parseNote(state.root + "4").pc;
 
@@ -75,7 +83,7 @@ export async function renderGuitarScales(el, ctx) {
   const kbHost = el.querySelector("#kbwrap"), fbHost = el.querySelector("#fbwrap");
   function paint() {
     kbHost.innerHTML = ""; fbHost.innerHTML = "";
-    renderKeyboard(kbHost, { lowMidi: REL_LOW, highMidi: REL_HIGH, rootPc, scalePcs: pcs,
+    renderKeyboard(kbHost, { lowMidi: REL_LOW, highMidi: REL_HIGH, rootPc, scalePcs: kbPcs,
       pressed, octaveDigits: false, colorByNote: true, onKey: toggle });
     renderFretboard(fbHost, { lowMidi: low, highMidi: high, rootPc, scalePcs: pcs,
       position: state.position, pressed, showRuler: true, colorByNote: true,
