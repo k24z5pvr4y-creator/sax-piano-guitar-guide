@@ -2,17 +2,17 @@
 // Fully working: three instrument cards, each expanding to its sub-branches.
 
 const TREE = [
-  { name: "Saxophone", blurb: "Note translator & scales with YDS-120 fingerings",
+  { name: "Saxophone", blurb: "Note translator and scale fingerings for alto or tenor",
     children: [
       { name: "Note Translator", path: "#/sax/translator" },
       { name: "Scales",          path: "#/sax/scales" },
     ] },
-  { name: "Piano", blurb: "Scales and chords across the full 88-key board",
+  { name: "Piano", blurb: "Scale and chord reference on a compact keyboard view",
     children: [
       { name: "Scales", path: "#/piano/scales" },
       { name: "Chords", path: "#/piano/chords" },
     ] },
-  { name: "Guitar", blurb: "Scale positions and chord voicings across 24 frets",
+  { name: "Guitar", blurb: "Full-neck scale positions and chord-box voicings",
     children: [
       { name: "Scales", path: "#/guitar/scales" },
       { name: "Chords", path: "#/guitar/chords" },
