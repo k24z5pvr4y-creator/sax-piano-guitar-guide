@@ -13,7 +13,10 @@ const BASE = {
   5: "#1e8449",  // F
   7: "#2471a3",  // G
   9: "#7d3c98",  // A
-  11: "#c2185b", // B
+  11: "#bf2290", // B — was #c2185b, a raspberry-red only ~29° of hue away from
+                 // C's brick red (they read as near-identical at a glance);
+                 // shifted toward fuchsia/magenta for clear separation from
+                 // both C and A.
 };
 // sharp pitch class -> the natural pitch class it fades from
 const FADES_FROM = { 1: 0, 3: 2, 6: 5, 8: 7, 10: 9 };
