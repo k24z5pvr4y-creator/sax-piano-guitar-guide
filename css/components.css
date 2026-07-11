@@ -1,0 +1,185 @@
+/* components.css — reusable UI pieces.
+   Many rules here are scaffolding targets: the renderers in js/render/*
+   generate the inner markup; these classes give them a consistent skin.
+   Where a component isn't built yet, the class + a TODO comment marks intent. */
+
+/* --- home: instrument chooser --- */
+.instrument-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: var(--gap);
+  margin-top: 24px;
+}
+.nav-card {
+  display: block;
+  text-align: left;
+  padding: 22px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: var(--surface-raised);
+  text-decoration: none;
+  color: inherit;
+  min-height: 96px;
+}
+.nav-card h3 { margin: 0 0 6px; }
+.nav-card p { margin: 0; color: var(--ink-muted); font-family: var(--font-ui); font-size: 0.9rem; }
+
+/* --- controls row (octave-range picker, root picker, toggles) --- */
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--gap);
+  align-items: center;
+  margin-bottom: 20px;
+}
+.controls label { font-family: var(--font-ui); font-size: 0.85rem; color: var(--ink-muted); }
+.seg {
+  display: inline-flex;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+.seg button { border: 0; border-radius: 0; }
+.seg button[aria-pressed="true"] { background: var(--tone-accent); color: var(--tone-accent-ink); }
+
+/* --- PIANO KEYBOARD ---------------------------------------------------------
+   Notched, interlocking silhouette (not plain rectangles). White keys are a
+   flex row; black keys are absolutely positioned children overlapping between
+   whites, always visually stacked above. keyboard.js renders the DOM; these
+   rules define the look. Root/scale/chord membership fills the WHOLE key. */
+.keyboard {
+  position: relative;
+  display: flex;
+  user-select: none;
+  height: 150px;
+  overflow-x: auto;
+}
+.pkey { position: relative; }
+.pkey.white {
+  flex: 0 0 44px;
+  height: 100%;
+  background: var(--key-white);
+  color: var(--key-white-ink);
+  border: 1px solid var(--border-strong);
+  border-radius: 0 0 5px 5px;
+  z-index: 1;
+}
+.pkey.black {
+  position: absolute;
+  width: 28px;
+  height: 62%;
+  background: var(--key-black);
+  color: var(--key-black-ink);
+  border: 1px solid #000;
+  border-radius: 0 0 4px 4px;
+  z-index: 2;              /* always above whites regardless of state */
+  transform: translateX(-50%);
+}
+.pkey .octlabel { position: absolute; bottom: 4px; left: 50%; transform: translateX(-50%);
+  font: 0.6rem var(--font-mono); color: var(--ink-muted); }
+/* per-key note label (sax translator: concert notes) */
+.pkey .keylabel { position: absolute; bottom: 4px; left: 50%; transform: translateX(-50%);
+  font: 0.55rem var(--font-mono); white-space: nowrap; pointer-events: none; }
+.pkey.white .keylabel { color: var(--key-white-ink); }
+.pkey.black .keylabel { color: var(--key-black-ink); bottom: 3px; }
+.pkey.is-root .keylabel { color: var(--tone-accent-ink); }
+/* membership fills (full-key, not a dot) */
+.pkey.is-scale  { background: var(--tone-accent-light); }
+.pkey.is-root   { background: var(--tone-accent); color: var(--tone-accent-ink); }
+.pkey.is-chord  { background: var(--tone-accent-light); }
+/* root marker in per-letter color mode (Guitar Scales only): the fill is
+   already that note's own color, so root just gets a ring instead of a
+   competing 8th hue. */
+.pkey.is-root-ring { box-shadow: inset 0 0 0 3px var(--ink); }
+/* pressed: grey with orange outline, independent of membership */
+.pkey.is-pressed { background: var(--key-pressed); box-shadow: inset 0 0 0 2px var(--key-pressed-ring); }
+
+/* --- GUITAR FRETBOARD -------------------------------------------------------
+   24-fret grid; 6 string rows x fret columns. Open strings on the nut line.
+   fretboard.js renders cells; dots show full octave label (F#3, not F). */
+.fretboard { overflow-x: auto; font-family: var(--font-mono); }
+.fb-ruler { display: grid; gap: 0; margin-bottom: 2px; }   /* cols set inline by renderer */
+.fb-ruler-cell { text-align: center; font: 0.65rem var(--font-ui); color: var(--ink-muted); }
+.fb-grid { display: grid; gap: 0; }         /* cols set inline by renderer */
+.fb-cell { position: relative; height: 30px; border-right: 1px solid var(--fret-wire);
+  border-bottom: 1px solid var(--border); }
+.fb-cell.nut { border-right: 3px solid var(--nut); }
+.fb-dot {
+  position: absolute; inset: 3px;
+  display: grid; place-items: center;
+  border-radius: 50%;
+  background: var(--tone-accent-light);
+  color: var(--tone-accent-ink);
+  font-size: 0.6rem;
+}
+.fb-dot.is-root { background: var(--tone-accent); }
+/* root marker in per-letter color mode (Guitar Scales only) — ring instead of
+   a competing 8th hue, same convention as the piano keyboard's is-root-ring */
+.fb-dot.is-root-ring { box-shadow: inset 0 0 0 2px var(--ink); }
+.fb-dot.is-press { outline: 2px solid var(--tone-accent); }   /* off-scale press injection */
+.fb-fretno { font: 0.65rem var(--font-ui); color: var(--ink-muted); text-align: center; }
+
+/* --- SAX FINGERING ----------------------------------------------------------
+   Pre-rendered flood-filled PNGs (not live SVG). sax.js swaps the <img>
+   src and offers alternate thumbnails to compare. */
+.sax-strip { display: flex; flex-wrap: wrap; gap: var(--gap); align-items: flex-start; }
+/* compact: sized so a full scale octave's worth of cards fits without
+   horizontal scrolling (used on the Scales strip, which shows root-to-root). */
+.sax-strip.compact .sax-card img { height: 200px; }
+.sax-card { text-align: center; }
+.sax-card img { height: 320px; width: auto; display: block; }
+.sax-card.is-default { outline: 2px solid var(--tone-accent); border-radius: var(--radius); }
+.sax-card .cap { font: 0.75rem var(--font-mono); color: var(--ink-muted); margin-top: 4px; }
+.sax-card .cap-top { margin: 0 0 4px; }
+.sax-toggle { margin-bottom: 16px; }   /* Alto / Tenor */
+/* click-to-cycle scale card */
+.sax-cycle { text-align: center; }
+.sax-cycle.has-alts { cursor: pointer; }
+.sax-cycle.has-alts:hover { outline: 1px dashed var(--tone-accent); border-radius: var(--radius); }
+.sax-cycle .cap { font: 0.72rem var(--font-mono); color: var(--ink-muted); margin-top: 4px; max-width: 160px; }
+/* out-of-range placeholder card */
+.sax-card.is-oor { display: flex; flex-direction: column; align-items: center;
+  justify-content: center; height: 320px; width: 120px; border: 1px dashed var(--border-strong);
+  border-radius: var(--radius); background: var(--surface-raised); opacity: 0.55; }
+.sax-card.is-oor .sax-oor { font-size: 2rem; color: var(--ink-muted); }
+.cap-sub { color: var(--ink-muted); }
+
+/* --- CHORD CARDS (piano mini-keyboards / guitar chord-box grid) --- */
+.chord-row { display: flex; flex-wrap: wrap; gap: var(--gap); padding-bottom: 8px; }
+.chord-card { border: 1px solid var(--border); border-radius: var(--radius);
+  background: var(--surface-raised); padding: 12px; min-width: 180px; }
+.chord-card h4 { margin: 0 0 8px; font-family: var(--font-ui); font-size: 0.9rem; }
+.roman { color: var(--ink-muted); font-family: var(--font-mono); }
+
+/* --- GUITAR CHORD-BOX DIAGRAM ------------------------------------------------
+   The standard compact chord-chart box: X/O mute·open markers, a narrow
+   fret window (not the whole 24-fret neck), string lines + fret wires, and
+   finger dots labeled with the note letter. Several boxes (one per voicing)
+   sit side by side inside a .chord-card; several cards wrap in a .chord-row,
+   so a whole tier of chord types tiles like a real chord-chart page instead
+   of stacking one-per-line or forcing a sideways scroll. */
+.chordbox { display: inline-flex; flex-direction: column; align-items: center;
+  font-family: var(--font-mono); }
+.cbox-markers { display: grid; grid-template-columns: repeat(6, 1fr); width: 132px;
+  margin-bottom: 2px; }
+.cbox-marker { text-align: center; font-size: 0.8rem; color: var(--ink-muted); line-height: 1; }
+.cbox-marker.is-open { color: var(--ink); }
+.cbox-gridwrap { display: flex; align-items: flex-start; gap: 4px; }
+.cbox-startfret { font-size: 0.65rem; color: var(--ink-muted); white-space: nowrap;
+  margin-top: 2px; }
+.cbox-grid { display: grid; width: 132px; height: 116px; border-left: 2px solid var(--fret-wire);
+  border-top: 1px solid var(--fret-wire); }
+.cbox-grid.is-nut { border-top: 4px solid var(--nut); }
+.cbox-cell { position: relative; border-right: 2px solid var(--fret-wire);
+  border-bottom: 1px solid var(--fret-wire); }
+.cbox-dot { position: absolute; border-radius: 50%;
+  background: var(--tone-accent-light); color: var(--tone-accent-ink);
+  display: grid; place-items: center; font-size: 0.6rem; transform: translate(-50%, -50%);
+  left: 50%; top: 50%; width: 20px; height: 20px; }
+.cbox-dot.is-root { background: var(--tone-accent); }
+.cbox-caption { margin-top: 4px; }
+.chordbox-row { display: flex; gap: 10px; flex-wrap: wrap; }
+
+/* --- theme toggle (icon only, currentColor SVG, no emoji/text) --- */
+.theme-toggle { background: transparent; border: 0; color: var(--ink); padding: 8px; }
+.theme-toggle svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 2; }

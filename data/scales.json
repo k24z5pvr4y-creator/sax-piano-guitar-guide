@@ -1,0 +1,29 @@
+{
+  "_comment": "Scale dictionary generated from standard music-theory interval formulas. Each 'intervals' array is semitone offsets from the root (0 = root). Do NOT source scale content from any copyrighted book; these are public-domain interval formulas. 'category' groups scales for UI sectioning.",
+  "scales": [
+    { "id": "major",            "name": "Major (Ionian)",        "category": "major-modes",  "intervals": [0,2,4,5,7,9,11] },
+    { "id": "dorian",           "name": "Dorian",                "category": "major-modes",  "intervals": [0,2,3,5,7,9,10] },
+    { "id": "phrygian",         "name": "Phrygian",              "category": "major-modes",  "intervals": [0,1,3,5,7,8,10] },
+    { "id": "lydian",           "name": "Lydian",                "category": "major-modes",  "intervals": [0,2,4,6,7,9,11] },
+    { "id": "mixolydian",       "name": "Mixolydian",            "category": "major-modes",  "intervals": [0,2,4,5,7,9,10] },
+    { "id": "aeolian",          "name": "Natural Minor (Aeolian)","category": "major-modes", "intervals": [0,2,3,5,7,8,10] },
+    { "id": "locrian",          "name": "Locrian",               "category": "major-modes",  "intervals": [0,1,3,5,6,8,10] },
+
+    { "id": "harmonic-minor",   "name": "Harmonic Minor",        "category": "minor",        "intervals": [0,2,3,5,7,8,11] },
+    { "id": "melodic-minor",    "name": "Melodic Minor (asc)",   "category": "minor",        "intervals": [0,2,3,5,7,9,11] },
+
+    { "id": "major-pentatonic", "name": "Major Pentatonic",      "category": "pentatonic",   "intervals": [0,2,4,7,9] },
+    { "id": "minor-pentatonic", "name": "Minor Pentatonic",      "category": "pentatonic",   "intervals": [0,3,5,7,10] },
+
+    { "id": "blues-minor",      "name": "Minor Blues",           "category": "blues",        "intervals": [0,3,5,6,7,10] },
+    { "id": "blues-major",      "name": "Major Blues",           "category": "blues",        "intervals": [0,2,3,4,7,9] },
+
+    { "id": "whole-tone",       "name": "Whole Tone",            "category": "symmetric",    "intervals": [0,2,4,6,8,10] },
+    { "id": "diminished-wh",    "name": "Diminished (W-H)",      "category": "symmetric",    "intervals": [0,2,3,5,6,8,9,11] },
+    { "id": "diminished-hw",    "name": "Diminished (H-W)",      "category": "symmetric",    "intervals": [0,1,3,4,6,7,9,10] },
+
+    { "id": "bebop-dominant",   "name": "Bebop Dominant",        "category": "bebop",        "intervals": [0,2,4,5,7,9,10,11] },
+    { "id": "bebop-major",      "name": "Bebop Major",           "category": "bebop",        "intervals": [0,2,4,5,7,8,9,11] },
+    { "id": "bebop-dorian",     "name": "Bebop Dorian",          "category": "bebop",        "intervals": [0,2,3,4,5,7,9,10] }
+  ]
+}

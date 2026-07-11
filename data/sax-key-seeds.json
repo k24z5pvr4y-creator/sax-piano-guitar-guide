@@ -1,0 +1,33 @@
+{
+  "_comment": "24 key seed coordinates for flood-filling assets/sax-template.jpg. This is the NATIVE 1068x2100 template (verified: all 24 seeds flood-fill CONTAINED, no leak into surrounding canvas). Chosen over the 1472x2894 upscaled version to keep the generated fingering PNG set a reasonable size for offline PWA caching on iPad -- native resolution is already crisp enough for on-screen reference use. These coordinates are used AS-IS, no scaling.",
+  "template_image": "assets/sax-template.jpg",
+  "template_width": 1068,
+  "template_height": 2100,
+  "_scaling_note": "If you ever replace sax-template.jpg with an image at a different resolution, rescale by (new_width/1068, new_height/2100) and re-run the flood-fill containment check in tools/generate_fingering_pngs.py before trusting the result -- do not reuse these values unscaled against a differently-sized image.",
+  "seeds": {
+    "C2":   [775, 325],
+    "C1":   [850, 425],
+    "C4":   [750, 550],
+    "X":    [600, 275],
+    "1":    [625, 400],
+    "p":    [625, 500],
+    "2":    [650, 600],
+    "3":    [700, 700],
+    "Oct":  [250, 460],
+    "LowA": [150, 660],
+    "G#":   [820, 775],
+    "B":    [775, 900],
+    "C#":   [850, 860],
+    "Bb":   [850, 1000],
+    "C3":   [300, 1000],
+    "Tc":   [300, 1150],
+    "Ta":   [300, 1300],
+    "C5":   [375, 1450],
+    "Tf":   [375, 1650],
+    "4":    [475, 1350],
+    "5":    [500, 1550],
+    "6":    [450, 1750],
+    "Eb":   [325, 1825],
+    "C":    [300, 1950]
+  }
+}

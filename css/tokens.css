@@ -1,0 +1,66 @@
+/* tokens.css — single source of truth for color/spacing/type.
+   Mirrors docs/app-cosmetic-adjustments.md. Orange accent; teal retired.
+   Dark mode flips ONLY black-key / border / surface / pressed tokens.
+   White piano keys stay white in both themes (see components.css). */
+
+:root {
+  /* --- accent (orange) --- */
+  --tone-accent:        #d2691e;  /* deep orange: root note, active */
+  --tone-accent-light:  #f0a868;  /* lighter orange: scale/chord tone */
+  --tone-accent-ink:    #ffffff;  /* text on accent fills */
+
+  /* --- surfaces & ink (light theme) --- */
+  --surface:            #faf8f4;  /* editorial off-white page */
+  --surface-raised:     #ffffff;  /* cards */
+  --ink:                #1c1a17;  /* primary text */
+  --ink-muted:          #6b645b;  /* captions, labels */
+  --border:             #ddd6cc;  /* hairline rules, key borders */
+  --border-strong:      #b9b0a3;
+
+  /* --- instrument-specific --- */
+  --key-white:          #ffffff;  /* piano white key face (theme-invariant) */
+  --key-white-ink:      #2a2620;
+  --key-black:          #2a2620;  /* piano black key face */
+  --key-black-ink:      #ffffff;
+  --key-pressed:        #9c968c;  /* grey pressed fill */
+  --key-pressed-ring:   var(--tone-accent);
+  --fret-dot:           var(--tone-accent);
+  --fret-wire:          #b9b0a3;
+  --nut:                #1c1a17;
+
+  /* --- type scale (editorial / reference-book) --- */
+  --font-display: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+  --font-body:    ui-serif, Georgia, "Times New Roman", serif;
+  --font-ui:      ui-sans-serif, -apple-system, "SF Pro Text", system-ui, sans-serif;
+  --font-mono:    ui-monospace, "SF Mono", Menlo, monospace;
+
+  --step-0: 1rem;
+  --step-1: 1.2rem;
+  --step-2: 1.5rem;
+  --step-3: 1.95rem;
+  --step-4: 2.5rem;
+
+  /* --- layout --- */
+  --touch-min: 44px;               /* iPad touch target floor */
+  --radius: 10px;
+  --gap: 12px;
+  --page-pad: max(16px, env(safe-area-inset-left));
+  --safe-top: env(safe-area-inset-top);
+  --safe-bottom: env(safe-area-inset-bottom);
+}
+
+:root[data-theme="dark"] {
+  --surface:        #17150f;
+  --surface-raised: #211d16;
+  --ink:            #f2ece0;
+  --ink-muted:      #a89f90;
+  --border:         #3a352b;
+  --border-strong:  #554d40;
+
+  /* white keys deliberately unchanged */
+  --key-black:      #0e0c08;
+  --key-pressed:    #4a453b;
+  --fret-wire:      #554d40;
+  --nut:            #f2ece0;
+  /* accent tokens stay the same in both themes */
+}

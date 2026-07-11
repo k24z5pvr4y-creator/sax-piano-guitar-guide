@@ -1,0 +1,17 @@
+{
+  "_comment": "Maps each YDS-120 key code (as used in sax-fingerings.json) to the finger that operates it. Used to compute a movement-cost score between two fingerings: cost = number of distinct fingers whose on/off state changes. This ONLY drives ranking of the default fingering vs alternates; it does not affect correctness of the diagrams. CONFIRMED: 'Oct' and 'LowA' are both left thumb. Other assignments are best-effort against standard sax mechanics and should be spot-checked against the YDS-120 layout before relying on the ranking. Values are canonical finger ids.",
+  "fingers": {
+    "L_thumb":  ["Oct", "LowA"],
+    "L_index":  ["1"],
+    "L_middle": ["2"],
+    "L_ring":   ["3"],
+    "L_pinky":  ["G#", "C#", "B", "Bb"],
+    "R_index":  ["4"],
+    "R_middle": ["5"],
+    "R_ring":   ["6"],
+    "R_pinky":  ["C", "Eb"],
+    "R_side":   ["Ta", "Tc", "Tf", "X", "p"],
+    "octave_palm": ["C1", "C2", "C3", "C4", "C5"]
+  },
+  "_note": "R_side and octave_palm group several codes under one physical region; if two codes in the same group toggle together the movement cost should still count them per-key OR per-finger depending on your ranking preference — decide this in js/render/sax.js and document the choice."
+}

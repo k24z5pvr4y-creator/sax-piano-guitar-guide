@@ -1,0 +1,42 @@
+{
+  "_comment": "Chord dictionary from standard interval formulas. 'intervals' = semitone offsets from the root. Public-domain theory only; do NOT source from any copyrighted book. 'symbol' is the suffix appended to a root name (e.g. root C + 'maj7' => 'Cmaj7'). 'tier' groups by complexity for the flowchart's 'triad -> most complex' progression. The 9-type core set (triads + 7ths) is marked core:true so 'Chords in scale' can use just those; 'All chords' uses the full list.",
+  "chords": [
+    { "id": "maj",      "symbol": "",       "name": "Major Triad",           "tier": "triad",      "core": true,  "intervals": [0,4,7] },
+    { "id": "min",      "symbol": "m",      "name": "Minor Triad",           "tier": "triad",      "core": true,  "intervals": [0,3,7] },
+    { "id": "dim",      "symbol": "dim",    "name": "Diminished Triad",      "tier": "triad",      "core": true,  "intervals": [0,3,6] },
+    { "id": "aug",      "symbol": "aug",    "name": "Augmented Triad",       "tier": "triad",      "core": true,  "intervals": [0,4,8] },
+    { "id": "sus2",     "symbol": "sus2",   "name": "Suspended 2nd",         "tier": "triad",      "core": false, "intervals": [0,2,7] },
+    { "id": "sus4",     "symbol": "sus4",   "name": "Suspended 4th",         "tier": "triad",      "core": false, "intervals": [0,5,7] },
+
+    { "id": "maj7",     "symbol": "maj7",   "name": "Major 7th",             "tier": "seventh",    "core": true,  "intervals": [0,4,7,11] },
+    { "id": "min7",     "symbol": "m7",     "name": "Minor 7th",             "tier": "seventh",    "core": true,  "intervals": [0,3,7,10] },
+    { "id": "dom7",     "symbol": "7",      "name": "Dominant 7th",          "tier": "seventh",    "core": true,  "intervals": [0,4,7,10] },
+    { "id": "m7b5",     "symbol": "m7b5",   "name": "Half-Diminished 7th",   "tier": "seventh",    "core": true,  "intervals": [0,3,6,10] },
+    { "id": "dim7",     "symbol": "dim7",   "name": "Diminished 7th",        "tier": "seventh",    "core": true,  "intervals": [0,3,6,9] },
+    { "id": "minMaj7",  "symbol": "mMaj7",  "name": "Minor-Major 7th",       "tier": "seventh",    "core": false, "intervals": [0,3,7,11] },
+    { "id": "6",        "symbol": "6",      "name": "Major 6th",             "tier": "seventh",    "core": false, "intervals": [0,4,7,9] },
+    { "id": "m6",       "symbol": "m6",     "name": "Minor 6th",             "tier": "seventh",    "core": false, "intervals": [0,3,7,9] },
+
+    { "id": "maj9",     "symbol": "maj9",   "name": "Major 9th",             "tier": "extended",   "core": false, "intervals": [0,4,7,11,14] },
+    { "id": "min9",     "symbol": "m9",     "name": "Minor 9th",             "tier": "extended",   "core": false, "intervals": [0,3,7,10,14] },
+    { "id": "dom9",     "symbol": "9",      "name": "Dominant 9th",          "tier": "extended",   "core": false, "intervals": [0,4,7,10,14] },
+    { "id": "maj11",    "symbol": "maj11",  "name": "Major 11th",            "tier": "extended",   "core": false, "intervals": [0,4,7,11,14,17] },
+    { "id": "min11",    "symbol": "m11",    "name": "Minor 11th",            "tier": "extended",   "core": false, "intervals": [0,3,7,10,14,17] },
+    { "id": "dom11",    "symbol": "11",     "name": "Dominant 11th",         "tier": "extended",   "core": false, "intervals": [0,4,7,10,14,17] },
+    { "id": "maj13",    "symbol": "maj13",  "name": "Major 13th",            "tier": "extended",   "core": false, "intervals": [0,4,7,11,14,17,21] },
+    { "id": "min13",    "symbol": "m13",    "name": "Minor 13th",            "tier": "extended",   "core": false, "intervals": [0,3,7,10,14,17,21] },
+    { "id": "dom13",    "symbol": "13",     "name": "Dominant 13th",         "tier": "extended",   "core": false, "intervals": [0,4,7,10,14,17,21] }
+  ],
+  "diatonic_seventh_qualities": {
+    "_comment": "Roman-numeral seventh-chord qualities per scale degree for the diatonic 'Chords in scale' view, keyed by scale id. Values are chord ids from the list above. Only the seven-note diatonic scales are covered; symmetric/pentatonic/bebop scales are handled by stacking thirds within the scale at render time instead.",
+    "major":          ["maj7","min7","min7","maj7","dom7","min7","m7b5"],
+    "aeolian":        ["min7","m7b5","maj7","min7","min7","maj7","dom7"],
+    "dorian":         ["min7","min7","maj7","dom7","min7","m7b5","maj7"],
+    "phrygian":       ["min7","maj7","dom7","min7","m7b5","maj7","min7"],
+    "lydian":         ["maj7","dom7","min7","m7b5","maj7","min7","min7"],
+    "mixolydian":     ["dom7","min7","m7b5","maj7","min7","min7","maj7"],
+    "locrian":        ["m7b5","maj7","min7","min7","maj7","dom7","min7"],
+    "harmonic-minor": ["minMaj7","m7b5","aug","min7","dom7","maj7","dim7"],
+    "melodic-minor":  ["minMaj7","min7","aug","dom7","dom7","m7b5","m7b5"]
+  }
+}
