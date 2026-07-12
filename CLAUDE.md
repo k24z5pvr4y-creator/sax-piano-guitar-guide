@@ -74,16 +74,9 @@ polluting the shared shape above:
   in the original fix, so the fretboard would go fully chromatic while the
   keyboard above it stayed scale-filtered and looked frozen/stuck.
 - `saxPressedMidi` — Sax ▸ Translator's single selected key.
-- `saxScaleOctave` — Sax ▸ Scales' octave picker, bounded to whatever octaves
-  the *currently selected instrument* can actually produce (alto: 2–5,
-  tenor: 1–5 — derived each render from the real fingering data's producible
-  concert range, not a hardcoded guess). See "Sax Scales" below for why the
-  picker exists and how the default is chosen.
-- `saxOctaveCount` — Sax ▸ Scales' "Octaves shown" picker (default 1); stacks
-  that many consecutive one-octave rows starting at `saxScaleOctave`, each on
-  its own line. Capped to the instrument's total octave slots
-  (`octHigh - octLow + 1`) so it can't offer more rows than the horn has
-  range for.
+  Sax ▸ Scales has no octave-picker state anymore — it shows the complete
+  written range (A2–D6) at once, grouped into rows by written octave; see
+  "Sax Scales" below.
 
 Each view module exports `render<Name>(el, { state, navigate })` and mounts
 into `#view`.
@@ -113,35 +106,32 @@ scale fill). Clicking shows the movement-cheapest fingering plus all
 alternates, captioned with friendly `"<note> Variation N"` labels — never a
 raw JSON id like `C#4-alt2`. Alto/Tenor toggle changes the concert mapping.
 
-**Sax ▸ Scales** (`/sax/scales`) — Root + Scale + Alto/Tenor + **Octave** +
-**Octaves shown** controls, realizing one octave per row (root up to the next
-occurrence of the root) as a strip of fingering cards sized to fit without
-horizontal scrolling; "Octaves shown" (default 1) stacks that many rows, each
-on its own line, starting at the picked octave and moving upward, with a
-small "Octave N" heading per row once more than one is shown. The Octave
-picker (bounded to what the current instrument can actually produce — alto:
-2–5, tenor: 1–5, not a fixed guess) exists because a hardcoded octave can
-push part of the scale outside what the instrument can play — e.g. root A at
-a fixed octave 4 puts the window's top note (A5, midi 81) 4 semitones past an
-alto's concert ceiling (F5, midi 77), so the highest few scale degrees
-rendered as out-of-range placeholders with no way to pick a lower,
-fully-playable octave. "Octaves shown" exists for the same reason from the
-other direction: a single one-octave window's start point is tied to (root,
-octave), so for many roots even the lowest selectable octave still doesn't
-reach the instrument's true bottom notes — e.g. root A at alto's lowest
-octave starts at concert A2 and can never show written A2–F3 (concert
-C2–G#2), even though those fingerings are correct and exist in the data;
-that's not a bug, an A-rooted scale genuinely has nothing below the lowest
-playable A, but a **C**-rooted scale at the lowest octave does reach those
-notes. Stacking rows makes more of an instrument's real range visible at
-once instead of hunting root-by-root for the one window that happens to
-reach a given note. The default octave is chosen automatically (closest to
-the middle of the current instrument's playable range) and re-picked if a
-root/instrument change makes the stored choice badly wrong, but is otherwise
-sticky and user-overridable; "Octaves shown" is capped to the instrument's
-total octave slots. Cards show written (sax) notation on top, concert pitch
-on the bottom; click a card to cycle its alternates; the movement-cost chain
-(`rankByMovement`) continues across octave rows, not just within one.
+**Sax ▸ Scales** (`/sax/scales`) — Root + Scale + Alto/Tenor controls, no
+octave picker. Shows **every** written note in the fingering chart's complete
+range (A2–D6, all 42 base written notes — same range regardless of
+instrument, since the fingering diagrams are written-pitch and
+instrument-independent) whose CONCERT pitch class belongs to the current
+scale, grouped into rows by written octave (2 through 6), each its own line
+with an "Octave N" heading. Cards show written (sax) notation on top, concert
+pitch on the bottom; click a card to cycle its alternates; the movement-cost
+chain (`rankByMovement`) continues across octave rows.
+
+This replaced an earlier "exactly one octave, root up to the next occurrence
+of the root" design (plus an Octave + Octaves-shown picker to stack several
+such windows) after a user report that low written notes (A2–F3) were
+"missing completely." They weren't missing from the data — verified A2
+renders correctly for root=C at the right octave — but a root-anchored
+ascending window's start point is tied to (root, octave), so high-pc roots
+like A can never reach below their own lowest playable instance (concert A2
+for alto), even though written A2–F3 (concert C2–G#2) are correct fingerings
+that simply belong to OTHER roots' scales. Stacking more octaves only
+extended the window upward, so it never actually fixed root=A specifically.
+The real requirement, stated directly: "all of them must be displayable when
+they are in any chosen scale" — i.e. every note whose concert pitch belongs
+to the scale should show, for any root, not just whichever ones happen to
+fall within one ascending window. Walking the fixed full range and filtering
+by scale membership (rather than by "is this within one window from the
+root") guarantees that.
 
 **Piano ▸ Scales** (`/piano/scales`) — Root + Scale only, no octave picker.
 Fixed 2-octave keyboard, no per-key octave-number label (`showCLabel: false`).
