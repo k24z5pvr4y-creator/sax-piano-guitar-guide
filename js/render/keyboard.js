@@ -27,13 +27,20 @@ import { midiToName } from "../theory/pitch.js";
 import { noteColor, noteTextColor } from "./noteColors.js";
 
 const WHITE_PCS = new Set([0, 2, 4, 5, 7, 9, 11]);
+// Original fixed sizing was 44px white / 28px black; keep that ratio so a
+// caller passing a smaller whiteKeyWidth (e.g. Sax Translator shrinking its
+// wide 3.5-octave range to fit without a scrollbar) gets proportionally
+// shrunk black keys too, instead of full-size 28px keys sitting on top of
+// much narrower whites.
+const BLACK_WHITE_RATIO = 28 / 44;
 
 function stripOctave(name) { return name.replace(/-?\d+$/, ""); }
 
 export function renderKeyboard(container, opts) {
   const { lowMidi, highMidi, rootPc, scalePcs = new Set(), pressed = new Set(),
           onKey, noteLabels = false, spelling = "sharp", octaveDigits = true,
-          fillScale = true, showCLabel = true, colorByNote = false } = opts;
+          fillScale = true, showCLabel = true, colorByNote = false,
+          whiteKeyWidth = 44 } = opts;
   const kb = document.createElement("div");
   kb.className = "keyboard";
   const label = (m) => {
@@ -41,13 +48,20 @@ export function renderKeyboard(container, opts) {
     return octaveDigits ? name : stripOctave(name);
   };
 
-  // pass 1: white keys
+  // pass 1: white keys. Width is a fixed px value computed once by the
+  // caller (default 44, the app-wide touch-target size) rather than a
+  // CSS flex-shrink that reacts to the viewport at any time — the black
+  // keys below are sized/positioned from this same fixed value in one
+  // pass, so the two can never fall out of sync the way they would if
+  // white keys resized live (e.g. on window resize) without a matching
+  // black-key recompute.
   const whites = [];
   for (let m = lowMidi; m <= highMidi; m++) {
     const pc = ((m % 12) + 12) % 12;
     if (!WHITE_PCS.has(pc)) continue;
     const k = document.createElement("div");
     k.className = "pkey white";
+    k.style.flex = `0 0 ${whiteKeyWidth}px`;
     applyState(k, pc, m, rootPc, scalePcs, pressed, fillScale, colorByNote);
     if (noteLabels && (scalePcs.has(pc) || pressed.has(m))) {
       k.innerHTML = `<span class="keylabel">${label(m)}</span>`;
@@ -72,6 +86,7 @@ export function renderKeyboard(container, opts) {
   // on a C (e.g. tenor sax's concert range starts on G) has no C in its first
   // partial octave, and anchoring there silently dropped every black key in
   // it.
+  const blackKeyWidth = whiteKeyWidth * BLACK_WHITE_RATIO;
   requestAnimationFrame(() => {
     const blacks = [];
     for (let m = lowMidi; m <= highMidi; m++) {
@@ -90,13 +105,13 @@ export function renderKeyboard(container, opts) {
         k.innerHTML = `<span class="keylabel">${label(m)}</span>`;
       }
       k.style.left = `${centerLeft}px`;
+      k.style.width = `${blackKeyWidth}px`;
       if (onKey) k.addEventListener("click", () => onKey(m));
       kb.appendChild(k);
       blacks.push({ centerLeft, el: k });
     }
 
-    // half-width of a black key (they're all the same CSS width)
-    const half = blacks.length ? blacks[0].el.offsetWidth / 2 : 11;
+    const half = blackKeyWidth / 2;
     for (const { el } of whites) {
       const wl = el.offsetLeft, ww = el.offsetWidth, wh = el.offsetHeight;
       const depth = wh * 0.62; // black keys extend this far down

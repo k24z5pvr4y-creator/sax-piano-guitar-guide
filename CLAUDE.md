@@ -120,6 +120,31 @@ scoped to `#kbwrap` itself is torn down for free when that element is
 cleared from the DOM. Its focus ring reuses the app's existing
 `:focus-visible` treatment (`base.css`) rather than a bespoke style.
 
+The keyboard here spans the whole instrument (~3.5 octaves, 25 white keys) —
+wider than every other keyboard in the app (Piano's 2-octave windows,
+Guitar's relationship keyboard), and wider than the app's fixed 44px
+touch-target key width fits without a horizontal scrollbar on most windows.
+`renderKeyboard()` (`render/keyboard.js`) takes an optional `whiteKeyWidth`
+(default 44, unchanged everywhere else) that sets each white key's flex-basis
+directly instead of relying on the shared `.pkey.white` CSS rule; this view
+computes it once per paint as `min(44, floor(kbwrap's measured clientWidth /
+25))` — shrinks only as much as actually needed, never grows past 44 on wide
+screens. Black-key width/position derive from that same fixed value in the
+same pass (`BLACK_WHITE_RATIO = 28/44`, the original fixed-size ratio), not
+from a live DOM measurement — an earlier version measured the rendered
+white-key width instead, which broke the moment CSS (rather than JS) was
+responsible for the shrink: `flex-shrink` reacts to viewport changes at any
+time, including a browser resize the app never re-renders in response to
+(there's no resize listener anywhere in this codebase), so on any resize
+after initial mount the white keys would visually reflow via pure CSS while
+the black keys — sized/positioned once at initial render — stayed put,
+visibly drifting out of alignment. Computing a fixed pixel value once in JS
+and driving both white and black sizing from that same number in the same
+render pass makes them structurally impossible to desync, and matches how
+black-key positioning already worked here (measured once, fixed thereafter)
+before this change — resize-desync just wasn't a risk before because 44px
+was a universal constant.
+
 **Sax ▸ Scales** (`/sax/scales`) — Root + Scale + Alto/Tenor controls, no
 octave picker. Shows **every** written note in the fingering chart's complete
 range (A2–D6, all 42 base written notes — same range regardless of

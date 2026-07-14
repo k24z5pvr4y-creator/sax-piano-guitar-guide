@@ -14,6 +14,13 @@ import { renderKeyboard } from "../render/keyboard.js";
 import { loadFingerings, fingeringsFor, rankByMovement, renderSaxCard, variationLabel } from "../render/sax.js";
 import { writtenToConcertMidi, concertToWrittenMidi, midiToName } from "../theory/pitch.js";
 
+const WHITE_PCS = new Set([0, 2, 4, 5, 7, 9, 11]);
+function countWhiteKeys(lowMidi, highMidi) {
+  let n = 0;
+  for (let m = lowMidi; m <= highMidi; m++) if (WHITE_PCS.has(((m % 12) + 12) % 12)) n++;
+  return n;
+}
+
 export async function renderSaxTranslator(el, { state }) {
   const entries = await loadFingerings();
   // producible written notes -> concert midis
@@ -71,12 +78,20 @@ export async function renderSaxTranslator(el, { state }) {
     paintStrip(concertMidi);
   };
 
+  // Full instrument range is ~3.5 octaves (25 white keys) — wider than the
+  // app's default 44px key width fits without a horizontal scrollbar on most
+  // windows. Shrink to whatever actually fits this container, never grow
+  // past 44px on wide screens. Computed once per paint (not resize-reactive,
+  // matching the rest of this renderer, which already isn't) so the white
+  // and black key geometry it drives always stay in sync with each other.
+  const whiteCount = countWhiteKeys(lowMidi, highMidi);
   const paintKeyboard = () => {
     kbHost.innerHTML = "";
+    const whiteKeyWidth = Math.max(1, Math.min(44, Math.floor(kbHost.clientWidth / whiteCount)));
     renderKeyboard(kbHost, {
       lowMidi, highMidi, rootPc: -1, scalePcs: produciblePcs, fillScale: false,
       pressed: state.saxPressedMidi == null ? new Set() : new Set([state.saxPressedMidi]),
-      noteLabels: true,
+      noteLabels: true, whiteKeyWidth,
       onKey: (concertMidi) => {
         if (!producibleSet.has(concertMidi)) return; // outside what the horn can play
         kbHost.focus(); // lets arrow keys take over navigation right after this click/tap
