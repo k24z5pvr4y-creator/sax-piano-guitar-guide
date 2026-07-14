@@ -278,12 +278,38 @@ never 7th chords) as plain text buttons; clicking one shows that triad on the
 same 2-octave window.
 
 **Piano ▸ Chords** (`/piano/chords`) — "All chords" vs "Chords in scale"
-toggle. Both modes: one card per chord, ROOT POSITION ONLY (no inversion
-loop), on a single fixed one-octave window (C4–B4). Because a wide chord
-(e.g. a 13th, spanning ~21 semitones) can't fit a register-accurate voicing in
-one octave, every card shows the chord's PITCH-CLASS set folded into that one
-octave instead — same convention the scale views already use. Cards wrap
-(`flex-wrap`) instead of scrolling sideways.
+toggle. "Chords in scale" is triads-only (see "Two chord systems" below), so
+it always renders on the fixed one-octave window (C4–B4) with the
+chord's PITCH-CLASS set folded into that octave — same convention the scale
+views already use. "All chords"' `triad`-tier cards use that same one-octave
+fold too. Cards wrap (`flex-wrap`) instead of scrolling sideways.
+
+**`seventh`/`extended`-tier cards in "All chords" are the exception:** these
+get a real 2-octave window anchored on the chord's own root (`rootMidi` to
+`rootMidi+23`), with the chord's actual notes lit at their real positions
+(`keyboard.js`'s `chordMidis`/`rootMidi` opts) rather than the pitch-class
+fold — a user report that "extended chords are rarely played on one octave"
+prompted this. Pitch-class folding would have been wrong here for a second
+reason too: fold a wide chord's real notes into one octave and a repeated
+pitch class (e.g. a 13th's root and its own 9th two octaves up sharing no
+class, but two different chord tones that happen to share a class) lights up
+every octave-repeat of that class instead of just the chord's actual notes —
+i.e. the chord would read as "stray" duplicate highlights instead of showing
+once, cleanly. `chordMidis`/`rootMidi` are exact-real-note Sets (parallel to
+the existing `pressed: Set<midi>` convention), not scale/theory math computed
+inside the renderer — `piano-chords.js` computes them
+(`chord.intervals.map(iv => rootMidi + iv)`) and hands them to
+`renderKeyboard`, keeping `keyboard.js` theory-free per the layering rule.
+`WIDE_KEY_WIDTH` (22px) is tuned so a 14-white-key 2-octave board lands on
+the same total footprint as a 7-white-key 1-octave card at the app's default
+44px — matters because both tiers' cards sit in the same wrapping
+`.chord-row` and must not visually overlap. Widest chord here (a 13th, 21
+semitones) fits comfortably inside the 24-semitone (2-octave) window from
+any root — verified numerically, not just by eye, since a black-key root
+(e.g. F#) makes `keyboard.js`'s anchor-based black-key placement the
+relevant edge case (same "window doesn't start on a natural note" logic
+already documented for tenor sax's G1-starting range, further down this
+file).
 
 **Guitar ▸ Scales** (`/guitar/scales`) — Root + Scale + Position + octave-range
 picker (the only view that keeps it — the fretboard genuinely needs a wide

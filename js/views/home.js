@@ -21,7 +21,7 @@ const TREE = [
 
 export function renderHome(el) {
   el.innerHTML = `
-    <p class="eyebrow">Personal reference</p>
+    <p class="eyebrow">Shadi's reference for</p>
     <h1>Sax · Piano · Guitar</h1>
     <a class="nav-card lw-hero" href="#/learn/how-it-works">
       <p class="eyebrow">Start here</p>

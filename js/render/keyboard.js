@@ -9,6 +9,12 @@
 //     scalePcs: Set<number>,      // scale/chord membership -> is-scale fill
 //     pressed: Set<number>,       // midi notes pressed -> grey + orange ring
 //     onKey(midi)                 // click handler (press-sync source)
+//     chordMidis: Set<number>,    // optional: exact real notes -> is-scale fill,
+//                                  // overriding scalePcs for multi-octave windows
+//                                  // where pitch-class matching would relight every
+//                                  // octave of a repeated class (Piano ▸ Chords'
+//                                  // seventh/extended cards)
+//     rootMidi: number,           // optional: exact root note, pairs with chordMidis
 //   }
 //
 // COSMETIC REQUIREMENTS (see cosmetic doc "Piano"):
@@ -40,7 +46,7 @@ export function renderKeyboard(container, opts) {
   const { lowMidi, highMidi, rootPc, scalePcs = new Set(), pressed = new Set(),
           onKey, noteLabels = false, spelling = "sharp", octaveDigits = true,
           fillScale = true, showCLabel = true, colorByNote = false,
-          whiteKeyWidth = 44 } = opts;
+          whiteKeyWidth = 44, chordMidis = null, rootMidi = null } = opts;
   const kb = document.createElement("div");
   kb.className = "keyboard";
   const label = (m) => {
@@ -62,7 +68,7 @@ export function renderKeyboard(container, opts) {
     const k = document.createElement("div");
     k.className = "pkey white";
     k.style.flex = `0 0 ${whiteKeyWidth}px`;
-    applyState(k, pc, m, rootPc, scalePcs, pressed, fillScale, colorByNote);
+    applyState(k, pc, m, rootPc, scalePcs, pressed, fillScale, colorByNote, chordMidis, rootMidi);
     if (noteLabels && (scalePcs.has(pc) || pressed.has(m))) {
       k.innerHTML = `<span class="keylabel">${label(m)}</span>`;
     } else if (pc === 0 && showCLabel) {
@@ -100,7 +106,7 @@ export function renderKeyboard(container, opts) {
       else continue; // neither natural neighbor is in the rendered window
       const k = document.createElement("div");
       k.className = "pkey black";
-      applyState(k, pc, m, rootPc, scalePcs, pressed, fillScale, colorByNote);
+      applyState(k, pc, m, rootPc, scalePcs, pressed, fillScale, colorByNote, chordMidis, rootMidi);
       if (noteLabels && (scalePcs.has(pc) || pressed.has(m))) {
         k.innerHTML = `<span class="keylabel">${label(m)}</span>`;
       }
@@ -148,10 +154,18 @@ function notchPolygon(w, h, depth, overlaps) {
   return `polygon(${p.join(", ")})`;
 }
 
-function applyState(k, pc, m, rootPc, scalePcs, pressed, fillScale, colorByNote) {
+// chordMidis (exact real-note Set<midi>), when given, replaces scalePcs'
+// pitch-class matching for this render: a pitch class can recur every
+// octave, but a specific chord tone (e.g. the 9th of a spread voicing)
+// exists at exactly one real position, so pc-matching across a multi-octave
+// window would light up every octave-repeat of that class instead of just
+// the chord's actual note. Same reasoning for rootMidi vs rootPc.
+function applyState(k, pc, m, rootPc, scalePcs, pressed, fillScale, colorByNote, chordMidis, rootMidi) {
   const isPressed = pressed.has(m);
   if (isPressed) k.classList.add("is-pressed"); // grey + ring wins over any fill
-  if (fillScale && scalePcs.has(pc) && !isPressed) {
+  const isMember = chordMidis ? chordMidis.has(m) : scalePcs.has(pc);
+  const isRoot = chordMidis ? m === rootMidi : pc === rootPc;
+  if (fillScale && isMember && !isPressed) {
     if (colorByNote) {
       k.style.backgroundColor = noteColor(pc);
       k.style.color = noteTextColor(pc);
@@ -159,7 +173,7 @@ function applyState(k, pc, m, rootPc, scalePcs, pressed, fillScale, colorByNote)
       k.classList.add("is-scale");
     }
   }
-  if (fillScale && pc === rootPc && !isPressed) {
+  if (fillScale && isRoot && !isPressed) {
     k.classList.add(colorByNote ? "is-root-ring" : "is-root");
   }
 }

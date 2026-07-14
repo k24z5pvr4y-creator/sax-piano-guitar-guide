@@ -21,6 +21,15 @@ import { parseNote, pcSet } from "../theory/pitch.js";
 
 const WIN_LOW = parseNote("C4").midi, WIN_HIGH = parseNote("B4").midi; // one octave, starts at C
 
+// Seventh/extended chords are rarely played folded into a single octave —
+// their real voicings spread wider, so "All chords" gives these two tiers a
+// genuine 2-octave window anchored on the chord's own root (exact notes via
+// chordMidis, not the pitch-class fold every other card uses) instead of the
+// fixed one-octave C4-B4 window. Widest chord here (13th) spans 21 semitones,
+// which fits inside 24 (2 octaves) with room to spare.
+const WIDE_TIERS = new Set(["seventh", "extended"]);
+const WIDE_KEY_WIDTH = 22; // 14 white keys * 22px ~= 7 white keys * 44px: same footprint as the 1-octave cards, so nothing overlaps in the wrapping row
+
 export async function renderPianoChords(el, ctx) {
   const { state } = ctx;
   const chordData = await loadChords();
@@ -60,10 +69,19 @@ export async function renderPianoChords(el, ctx) {
       const h = document.createElement("h3"); h.textContent = titleCase(tier); out.appendChild(h);
       const row = document.createElement("div"); row.className = "chord-row"; out.appendChild(row);
       for (const chord of chords) {
-        const card = document.createElement("div"); card.className = "chord-card chord-card-piano";
+        const isWide = WIDE_TIERS.has(tier);
+        const card = document.createElement("div");
+        card.className = "chord-card chord-card-piano" + (isWide ? " chord-card-piano-wide" : "");
         card.innerHTML = `<h4>${chordSymbol(state.root, chord)}</h4>`;
-        renderKeyboard(card, { lowMidi: WIN_LOW, highMidi: WIN_HIGH, rootPc,
-          scalePcs: new Set(pcSet(rootPc, chord.intervals)), pressed: new Set() });
+        if (isWide) {
+          const rootMidi = parseNote(state.root + "4").midi;
+          const chordMidis = new Set(chord.intervals.map(iv => rootMidi + iv));
+          renderKeyboard(card, { lowMidi: rootMidi, highMidi: rootMidi + 23, rootPc,
+            chordMidis, rootMidi, pressed: new Set(), whiteKeyWidth: WIDE_KEY_WIDTH });
+        } else {
+          renderKeyboard(card, { lowMidi: WIN_LOW, highMidi: WIN_HIGH, rootPc,
+            scalePcs: new Set(pcSet(rootPc, chord.intervals)), pressed: new Set() });
+        }
         row.appendChild(card);
       }
     }
