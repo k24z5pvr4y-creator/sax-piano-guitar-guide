@@ -42,23 +42,24 @@ const PALM_NOTES = ["D5", "D#5", "E5", "F5", "G5"];
 // makes the side-keys/palm-keys link concrete: two side keys firing at once).
 const SIDE_NOTES = ["F#4", "A5", "F#5"];
 
-// Anchors for the "jump to" nav panel — plain in-page scroll targets, NOT
-// hash links. The app's router treats any `location.hash` change as a route
-// change (see app.js's `route()`: an unrecognized hash falls back to `"/"`
-// and re-renders Home), so `<a href="#core-idea">` would nuke this page
-// instead of scrolling. Buttons + `scrollIntoView` sidestep the router
-// entirely.
+// Tabs for the section switcher — real tabs (one panel visible at a time),
+// NOT hash links. The app's router treats any `location.hash` change as a
+// route change (see app.js's `route()`: an unrecognized hash falls back to
+// `"/"` and re-renders Home), so `<a href="#core-idea">` would nuke this
+// page instead of switching panels. Plain `<button>`s + toggling `hidden`
+// sidestep the router entirely. Labels are short single words/phrases (not
+// the full section headings) so all 7 fit on one line without wrapping.
 const TOC = [
-  { id: "core-idea", label: "The core idea: a shortening tube" },
-  { id: "home-row", label: "The home row" },
-  { id: "octave-key", label: "The octave key" },
-  { id: "transposition", label: "Why sax transposes" },
-  { id: "chromatic-fixes", label: "Why it looks messy: the chromatic fixes" },
-  { id: "variations", label: "One pitch, several fingerings" },
+  { id: "core-idea", label: "Core idea" },
+  { id: "home-row", label: "Home row" },
+  { id: "octave-key", label: "Octave key" },
+  { id: "transposition", label: "Transposition" },
+  { id: "chromatic-fixes", label: "Chromatic fixes" },
+  { id: "variations", label: "Variations" },
   { id: "see-it-live", label: "See it live" },
 ];
 
-export async function renderHowItWorks(el) {
+export async function renderHowItWorks(el, { state } = {}) {
   const [entries, keyToFinger] = await Promise.all([loadFingerings(), loadFingerMap()]);
   const byNote = new Map(entries.map(e => [e.note, e]));
 
@@ -67,6 +68,9 @@ export async function renderHowItWorks(el) {
   const tenorLow = midiToName(writtenToConcertMidi("D3", "tenor"));
   const tenorHigh = midiToName(writtenToConcertMidi("D4", "tenor"));
 
+  state.howItWorksTab ??= TOC[0].id;
+  const activeId = state.howItWorksTab;
+
   el.innerHTML = `
     <p class="eyebrow">Start here</p>
     <h1>How It Works</h1>
@@ -74,14 +78,12 @@ export async function renderHowItWorks(el) {
       mechanism behind them. Once it clicks, you stop memorizing 91 individual pictures and
       start recognizing a handful of physical moves.</p>
 
-    <nav class="lw-toc" aria-label="Jump to section">
-      <p class="lw-toc-label">On this page</p>
-      <div class="lw-toc-list">
-        ${TOC.map(t => `<button type="button" class="lw-toc-item" data-target="${t.id}">${t.label}</button>`).join("")}
-      </div>
-    </nav>
+    <div class="lw-tabs" role="tablist" aria-label="How It Works sections">
+      ${TOC.map(t => `<button type="button" role="tab" class="lw-tab${t.id === activeId ? " is-active" : ""}"
+        aria-selected="${t.id === activeId}" data-target="${t.id}">${t.label}</button>`).join("")}
+    </div>
 
-    <section class="lw-section" id="core-idea">
+    <section class="lw-section" id="core-idea"${activeId === "core-idea" ? "" : " hidden"}>
       <h2>The core idea: a shortening tube</h2>
       <p>A saxophone is a very elaborate whistle. Air travels from the mouthpiece to the
         first open hole it can escape through — the tube's <em>acoustic length</em> stops
@@ -92,7 +94,7 @@ export async function renderHowItWorks(el) {
         just what makes the tube shorter.</p>
     </section>
 
-    <section class="lw-section" id="home-row">
+    <section class="lw-section" id="home-row"${activeId === "home-row" ? "" : " hidden"}>
       <h2>The home row</h2>
       <p>Six fingers — three per hand — rest on the horn's main keys, the same way your
         hands have a home position on a keyboard. Starting with all six down and lifting
@@ -106,7 +108,7 @@ export async function renderHowItWorks(el) {
         higher stops being just "fewer fingers down."</p>
     </section>
 
-    <section class="lw-section" id="octave-key">
+    <section class="lw-section" id="octave-key"${activeId === "octave-key" ? "" : " hidden"}>
       <h2>The octave key — sax's copy-paste button</h2>
       <p>A piano needs a whole separate key for every octave; a guitar needs you to move up
         exactly 12 frets. A sax has neither — your left thumb operates a single octave key
@@ -138,7 +140,7 @@ export async function renderHowItWorks(el) {
       </div>
     </section>
 
-    <section class="lw-section" id="transposition">
+    <section class="lw-section" id="transposition"${activeId === "transposition" ? "" : " hidden"}>
       <h2>Same fingers, different pitch: why sax transposes</h2>
       <p>Every fingering on this page so far has been described in terms of what's
         <strong>written</strong> — the note printed on the part, and the note this whole
@@ -170,7 +172,7 @@ export async function renderHowItWorks(el) {
         Alto/Tenor toggle without changing a single fingering.</p>
     </section>
 
-    <section class="lw-section" id="chromatic-fixes">
+    <section class="lw-section" id="chromatic-fixes"${activeId === "chromatic-fixes" ? "" : " hidden"}>
       <h2>Why it looks messy: the chromatic fixes</h2>
       <p>Ten fingers, twelve semitones per octave. The extra levers clustered around your
         pinkies, palm, and the side of your right hand exist to fill that gap without ever
@@ -215,7 +217,7 @@ export async function renderHowItWorks(el) {
         "separate" clusters stop being separate and start combining.</p>
     </section>
 
-    <section class="lw-section" id="variations">
+    <section class="lw-section" id="variations"${activeId === "variations" ? "" : " hidden"}>
       <h2>One pitch, several fingerings</h2>
       <p>Not every note has exactly one "correct" fingering. Written B♭3 is the sax's
         most famous example — the real chart lists five different ways to play it, and
@@ -236,7 +238,7 @@ export async function renderHowItWorks(el) {
         too. Try it live: <a href="#/sax/translator">Sax ▸ Note Translator →</a></p>
     </section>
 
-    <section class="lw-section" id="see-it-live">
+    <section class="lw-section" id="see-it-live"${activeId === "see-it-live" ? "" : " hidden"}>
       <h2>See it live</h2>
       <p>This page explains the mechanism; these two views are the interactive chart itself —
         every note, every alternate fingering, ranked by how little you have to move to get
@@ -265,10 +267,19 @@ export async function renderHowItWorks(el) {
         starts being something you can predict.</p>
     </section>`;
 
-  el.querySelector(".lw-toc").addEventListener("click", (ev) => {
-    const btn = ev.target.closest(".lw-toc-item");
+  el.querySelector(".lw-tabs").addEventListener("click", (ev) => {
+    const btn = ev.target.closest(".lw-tab");
     if (!btn) return;
-    el.querySelector(`#${btn.dataset.target}`)?.scrollIntoView({ behavior: "smooth", block: "start" });
+    const targetId = btn.dataset.target;
+    state.howItWorksTab = targetId;
+    for (const t of TOC) {
+      el.querySelector(`#${t.id}`).hidden = t.id !== targetId;
+    }
+    for (const tabBtn of el.querySelectorAll(".lw-tab")) {
+      const isActive = tabBtn.dataset.target === targetId;
+      tabBtn.classList.toggle("is-active", isActive);
+      tabBtn.setAttribute("aria-selected", isActive);
+    }
   });
 
   renderHomeRowFilmstrip(el.querySelector("#homeRow"), byNote, keyToFinger);

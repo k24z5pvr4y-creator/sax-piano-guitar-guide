@@ -250,34 +250,38 @@
 .lw-crosslink { margin: -8px 0 16px; }
 .lw-crosslink a { color: var(--tone-accent); text-decoration: none; }
 .lw-lead { font-size: 1.1rem; color: var(--ink-muted); max-width: 60ch; }
-.lw-toc {
+/* One line of tabs, never wrapping — scrolls horizontally instead on
+   viewports too narrow to fit all 7 (kept to its own scroll container per
+   the app's overflow rule, not the page). Only the matching .lw-section
+   (toggled via the `hidden` attribute in how-it-works.js) is shown at a
+   time; this is a real tab switcher, not a scroll-to-anchor nav. */
+.lw-tabs {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 8px;
   margin-top: 24px;
-  padding: 16px;
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  background: var(--surface-raised);
+  padding-bottom: 4px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
-.lw-toc-label {
-  margin: 0 0 10px;
-  font-family: var(--font-ui);
-  font-size: 0.8rem;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  color: var(--ink-muted);
-}
-.lw-toc-list { display: flex; flex-wrap: wrap; gap: 8px; }
-.lw-toc-item {
+.lw-tab {
+  flex: 0 0 auto;
   border: 1px solid var(--border);
   border-radius: 999px;
   background: var(--surface);
-  color: var(--tone-accent);
+  color: var(--ink);
   font-family: var(--font-ui);
   font-size: 0.85rem;
   padding: 8px 16px;
   cursor: pointer;
-  text-align: left;
+  white-space: nowrap;
 }
-.lw-toc-item:hover { background: var(--tone-accent-light); }
+.lw-tab:hover { background: var(--tone-accent-light); }
+.lw-tab.is-active {
+  background: var(--tone-accent);
+  border-color: var(--tone-accent);
+  color: var(--tone-accent-ink);
+}
 .lw-section { margin-top: 40px; padding-top: 24px; border-top: 1px solid var(--border); }
 .lw-section > p { max-width: 68ch; }
 .lw-subhead { margin-top: 28px; }

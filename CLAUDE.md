@@ -113,18 +113,33 @@ app's own words (not copied) per the copyright rule above, and *corrected*
 against the real 91-entry fingering chart rather than trusting the source
 document's claims at face value.
 
-A "Jump to" TOC panel sits right below the lead paragraph — one button per
-`<h2>` section (core idea, home row, octave key, transposition, chromatic
-fixes, variations, see-it-live), scrolling to that section's `id` via
-`scrollIntoView`. These are plain `<button>`s wired up with a single
-click-delegated listener scoped to the `.lw-toc` element, **not**
-`<a href="#core-idea">` anchors — the app's hash router treats any
-`location.hash` change as a route change (`app.js`'s `route()` falls back to
-`routes["/"]` for any hash it doesn't recognize and re-renders Home), so a
-real anchor link would blow away this page instead of scrolling within it.
-If you add a new `<h2>` section, add both its `id` and a matching entry to
-the `TOC` array in `how-it-works.js` — they're two separate lists kept in
-sync by hand, nothing enforces it structurally.
+A one-line tab bar sits right below the lead paragraph — one tab per section
+(core idea, home row, octave key, transposition, chromatic fixes,
+variations, see-it-live) — and only the selected section's content is in
+the DOM as visible; every other `<section>` carries the `hidden` attribute.
+This is a real tab switcher, not a scroll-to-anchor nav: clicking a tab sets
+`state.howItWorksTab` and toggles `hidden` on each `<section id="...">` plus
+`.is-active`/`aria-selected` on each tab button, all from a single
+click-delegated listener scoped to `.lw-tabs` (never a per-button listener —
+same "no unmount hook" reasoning as everywhere else in this app, see
+`js/CLAUDE.md`). Tab labels are short (one or two words each), not the full
+`<h2>` heading text, specifically so all 7 fit on one line without
+wrapping; the row falls back to horizontal scroll (`overflow-x: auto`,
+never page-level overflow) rather than wrapping to a second line on narrow
+viewports. `state.howItWorksTab` persists the selection across navigation
+away and back, following the same `state.foo ??= …` lazy-attach pattern
+every other view uses.
+
+These are plain `<button>`s, **not** `<a href="#core-idea">` anchors — the
+app's hash router treats any `location.hash` change as a route change
+(`app.js`'s `route()` falls back to `routes["/"]` for any hash it doesn't
+recognize and re-renders Home), so a real anchor link would blow away this
+page instead of switching tabs. If you add a new `<h2>` section, add both
+its `id`+`hidden` on the `<section>` and a matching entry to the `TOC` array
+in `how-it-works.js` — they're two separate lists kept in sync by hand,
+nothing enforces it structurally. The closing "takeaway" section at the
+bottom has no tab and is not part of this system — it stays visible under
+every tab as a persistent closing summary.
 
 Every fingering shown on this page is pulled live from
 `data/sax-fingerings.json` via the same `renderSaxCard`/`loadFingerings`
