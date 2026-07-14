@@ -230,6 +230,40 @@
 .cbox-caption { margin-top: 4px; }
 .chordbox-row { display: flex; gap: 10px; flex-wrap: wrap; }
 
+/* --- HOW IT WORKS (/learn/how-it-works) -------------------------------------
+   Featured cross-instrument primer. Reuses .nav-card/.sax-strip/.sax-card
+   rather than inventing parallel card styles; these rules only cover the
+   page's own layout (section rhythm, lead paragraph, the Home banner). */
+.lw-hero {
+  display: block;
+  margin: 18px 0 4px;
+  border-color: var(--tone-accent);
+  background: var(--tone-accent-light);
+  color: var(--ink);
+}
+.lw-hero .eyebrow { color: var(--ink); opacity: 0.75; }
+.lw-hero p:last-child { margin: 0; color: var(--ink); }
+.lw-crosslink { margin: -8px 0 16px; }
+.lw-crosslink a { color: var(--tone-accent); text-decoration: none; }
+.lw-lead { font-size: 1.1rem; color: var(--ink-muted); max-width: 60ch; }
+.lw-section { margin-top: 40px; padding-top: 24px; border-top: 1px solid var(--border); }
+.lw-section > p { max-width: 68ch; }
+.lw-subhead { margin-top: 28px; }
+.lw-filmstrip { margin-top: 12px; }
+.lw-note { max-width: 68ch; }
+.lw-compare-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: var(--gap);
+  margin-top: 14px;
+}
+.lw-takeaway {
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  max-width: 60ch;
+  line-height: 1.5;
+}
+
 /* --- theme toggle (icon only, currentColor SVG, no emoji/text) --- */
 .theme-toggle { background: transparent; border: 0; color: var(--ink); padding: 8px; }
 .theme-toggle svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 2; }

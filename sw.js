@@ -10,7 +10,7 @@
 // returning visitor) and is why the fetch handler below is network-first
 // rather than cache-first: it self-heals on every deploy instead of relying
 // on remembering to bump this string.
-const CACHE = "instrument-ref-v2";
+const CACHE = "instrument-ref-v3";
 const ASSETS = [
   "./", "./index.html",
   "./css/tokens.css", "./css/base.css", "./css/components.css",
@@ -21,6 +21,7 @@ const ASSETS = [
   "./js/views/home.js", "./js/views/sax-translator.js", "./js/views/sax-scales.js",
   "./js/views/piano-scales.js", "./js/views/piano-chords.js",
   "./js/views/guitar-scales.js", "./js/views/guitar-chords.js",
+  "./js/views/how-it-works.js",
   "./data/sax-fingerings.json", "./data/sax-key-finger-map.json",
   "./data/scales.json", "./data/chords.json",
   "./manifest.webmanifest"

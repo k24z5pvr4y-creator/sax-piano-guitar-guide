@@ -9,6 +9,7 @@ import { renderPianoScales } from "./views/piano-scales.js";
 import { renderPianoChords } from "./views/piano-chords.js";
 import { renderGuitarScales } from "./views/guitar-scales.js";
 import { renderGuitarChords } from "./views/guitar-chords.js";
+import { renderHowItWorks } from "./views/how-it-works.js";
 
 // --- shared app state (no persistence needed per brief) --------------------
 // The octave-range picker propagates to sax + guitar + piano, so it lives here.
@@ -22,6 +23,7 @@ export const state = {
 // route -> { title, crumbs, render }
 const routes = {
   "/":                 { title: "Choose Instrument", crumbs: [],                            render: renderHome },
+  "/learn/how-it-works": { title: "How It Works",    crumbs: [],                            render: renderHowItWorks },
   "/sax/translator":   { title: "Note Translator",   crumbs: ["Saxophone"],                 render: renderSaxTranslator },
   "/sax/scales":       { title: "Scales",            crumbs: ["Saxophone"],                 render: renderSaxScales },
   "/piano/scales":     { title: "Scales",            crumbs: ["Piano"],                     render: renderPianoScales },

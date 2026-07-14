@@ -39,6 +39,50 @@ export async function loadFingerings() {
   return _entries;
 }
 
+let _fingerMap = null;
+export async function loadFingerMap() {
+  if (_fingerMap) return _fingerMap;
+  const res = await fetch("./data/sax-key-finger-map.json");
+  const json = await res.json();
+  // invert key-code -> finger-id for O(1) lookup per key
+  const keyToFinger = {};
+  for (const [finger, keys] of Object.entries(json.fingers)) {
+    for (const k of keys) keyToFinger[k] = finger;
+  }
+  _fingerMap = keyToFinger;
+  return _fingerMap;
+}
+
+const FRIENDLY_FINGER = {
+  L_thumb: "Left thumb", L_index: "Left index finger", L_middle: "Left middle finger",
+  L_ring: "Left ring finger", L_pinky: "Left pinky",
+  R_index: "Right index finger", R_middle: "Right middle finger", R_ring: "Right ring finger",
+  R_pinky: "Right pinky", R_side: "Right-hand side key", octave_palm: "Palm key",
+};
+
+// Describes what changes between two fingerings' required[] sets, in terms of
+// which finger(s) actually move — used to auto-caption the "home row" filmstrip
+// on the How It Works page instead of hand-writing (and risking wrong) captions.
+// Computed live from the real chart so it self-corrects if the data changes,
+// and it plainly says so when a step ISN'T a clean single-finger lift (several
+// real notes engage extra keys rather than just lifting one more finger).
+export function describeFingerChange(prevRequired, curRequired, keyToFinger) {
+  const prev = new Set(prevRequired), cur = new Set(curRequired);
+  const removed = [...prev].filter(k => !cur.has(k));
+  const added = [...cur].filter(k => !prev.has(k));
+  if (added.length === 0 && removed.length > 0) {
+    const fingers = [...new Set(removed.map(k => FRIENDLY_FINGER[keyToFinger[k]] || k))];
+    const verb = fingers.length > 1 ? "lift" : "lifts";
+    return `${fingers.join(" and ")} ${verb}`;
+  }
+  if (added.length > 0) {
+    const fingers = [...new Set(added.map(k => FRIENDLY_FINGER[keyToFinger[k]] || k))];
+    const verb = fingers.length > 1 ? "engage" : "engages";
+    return `Not a simple lift — ${fingers.join(", ")} also ${verb}`;
+  }
+  return "No change";
+}
+
 // All fingerings whose base note matches (strips the -alt/-altN suffix).
 export function fingeringsFor(entries, writtenName) {
   const base = writtenName.replace(/-alt\d*$/, "");

@@ -99,6 +99,40 @@ Layers:
 
 ## Per-view feature summary
 
+**How It Works** (`/learn/how-it-works`) — top-level cross-instrument primer,
+featured as a banner card on Home (above the instrument grid, not nested
+under Saxophone — it explicitly compares piano/guitar/sax so it doesn't
+belong to one instrument's section) plus small cross-links from Sax ▸
+Translator and Sax ▸ Scales. Explains the physical mechanism behind sax
+fingerings (tube-shortening, the octave key, side/pinky/palm keys) and how
+the same "shorten the vibrating length, then reuse the shape an octave up"
+idea shows up on guitar (frets, 12-fret octave) and piano (fixed key per
+pitch, no shortcut — you must relocate your hand). Originally drafted from a
+user-supplied source document explaining sax mechanics; rewritten in this
+app's own words (not copied) per the copyright rule above, and *corrected*
+against the real 91-entry fingering chart rather than trusting the source
+document's claims at face value.
+
+Every fingering shown on this page is pulled live from
+`data/sax-fingerings.json` via the same `renderSaxCard`/`loadFingerings`
+helpers every other sax view uses — nothing here is a hand-typed claim about
+what a fingering is, so the page can't silently drift out of sync with the
+real chart. This mattered in practice: the source document's "home row"
+model (lift one main finger at a time, bottom to top, for a clean ascending
+scale) holds for written D3→A3 but breaks at B3/C#4, where the real chart
+pulls in the octave key plus pinky-table keys rather than just releasing one
+more of the original six. `describeFingerChange()` (`render/sax.js`) computes
+each filmstrip caption by diffing consecutive notes' `required[]` against
+`sax-key-finger-map.json` live, so it states the true mechanism at each step
+(and says so plainly when a step "isn't a clean lift") instead of a smoothed
+narrative that would have been wrong for 2 of the 7 steps. The octave-key
+demo pair (written D3 vs D4) and the pinky/palm/side-key examples (lowest
+notes A2–C3, high D5/E5/F5, first ascending note whose `required[]` hits a
+side-key code) were all verified against the actual JSON before being
+hardcoded as the illustrative examples — don't assume a note pair is a clean
+"+Oct only" match without checking; most aren't (register breaks and
+palm/side keys commonly change too).
+
 **Sax ▸ Note Translator** (`/sax/translator`) — plain black/white keyboard
 spanning the current instrument's full producible concert range (labeled in
 concert pitch, sharps only); a key only turns orange when clicked (no default
@@ -411,7 +445,8 @@ RWTH vault repo it physically lives inside (`/Users/shadi/RWTH` is a
 different git root entirely, with no remote and unrelated private content —
 don't let the two get confused, and never push from the vault root). `.gitignore`
 excludes the reference PDFs/images sitting in this folder (Musora/Pianote-style
-scale & chord books, `Flowchart (1).jpg`, `saxchart.jpeg`) — those are source
+scale & chord books, `Flowchart (1).jpg`, `saxchart.jpeg`) and any `.docx`
+(e.g. the source document "How It Works" was drafted from) — those are source
 material for the human, not app content, and per the copyright rule above must
 never end up in the public repo. A push to `main` needs a manual Pages rebuild
 trigger (`gh api -X POST repos/.../pages/builds`) to actually redeploy; it
