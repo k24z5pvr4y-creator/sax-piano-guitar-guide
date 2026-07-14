@@ -244,19 +244,10 @@
 .cbox-caption { margin-top: 4px; }
 .chordbox-row { display: flex; gap: 10px; flex-wrap: wrap; }
 
-/* --- HOW IT WORKS (/learn/how-it-works) -------------------------------------
-   Featured cross-instrument primer. Reuses .nav-card/.sax-strip/.sax-card
+/* --- FINGERING INTUITION (/learn/how-it-works) ------------------------------
+   Saxophone ▸ Fingering Intuition. Reuses .nav-card/.sax-strip/.sax-card
    rather than inventing parallel card styles; these rules only cover the
-   page's own layout (section rhythm, lead paragraph, the Home banner). */
-.lw-hero {
-  display: block;
-  margin: 18px 0 4px;
-  border-color: var(--tone-accent);
-  background: var(--tone-accent-light);
-  color: var(--ink);
-}
-.lw-hero .eyebrow { color: var(--ink); opacity: 0.75; }
-.lw-hero p:last-child { margin: 0; color: var(--ink); }
+   page's own layout (section rhythm, tabs). */
 .lw-crosslink { margin: -8px 0 16px; }
 .lw-crosslink a { color: var(--tone-accent); text-decoration: none; }
 /* One line of tabs, never wrapping — scrolls horizontally instead on

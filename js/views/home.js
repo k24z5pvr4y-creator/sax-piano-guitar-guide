@@ -4,8 +4,9 @@
 const TREE = [
   { name: "Saxophone",
     children: [
-      { name: "Note Translator", path: "#/sax/translator" },
-      { name: "Scales",          path: "#/sax/scales" },
+      { name: "Note Translator",   path: "#/sax/translator" },
+      { name: "Scales",            path: "#/sax/scales" },
+      { name: "Fingering Intuition", path: "#/learn/how-it-works" },
     ] },
   { name: "Piano",
     children: [
@@ -23,12 +24,6 @@ export function renderHome(el) {
   el.innerHTML = `
     <p class="eyebrow">Shadi's reference for</p>
     <h1>Sax · Piano · Guitar</h1>
-    <a class="nav-card lw-hero" href="#/learn/how-it-works">
-      <p class="eyebrow">Start here</p>
-      <h3>How It Works</h3>
-      <p>Why lifting fingers raises pitch, what the octave key actually does, and how the
-        same ideas show up on piano and guitar. Read this first →</p>
-    </a>
     <div class="instrument-grid">
       ${TREE.map(inst => `
         <div class="nav-card">

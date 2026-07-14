@@ -1,7 +1,8 @@
-// how-it-works.js — "How It Works", the cross-instrument physics primer.
-// FLOWCHART: none — this is a new top-level route (/learn/how-it-works),
-// featured on Home, that explains WHY the fingerings/frets/keys work the way
-// they do, then hands off into the app's own interactive tools (Sax
+// how-it-works.js — Saxophone ▸ Fingering Intuition, the cross-instrument
+// physics primer.
+// FLOWCHART: none — route /learn/how-it-works, nested under Saxophone on
+// Home, that explains WHY the fingerings/frets/keys work the way they do,
+// then hands off into the app's own interactive tools (Sax
 // Translator/Scales, Piano Scales, Guitar Scales) as "the live version of
 // the chart." Every fingering shown here is pulled live from
 // data/sax-fingerings.json and rendered with the same renderSaxCard used
@@ -72,10 +73,10 @@ export async function renderHowItWorks(el, { state } = {}) {
   const activeId = state.howItWorksTab;
 
   el.innerHTML = `
-    <p class="eyebrow">Start here</p>
-    <h1>How It Works</h1>
+    <p class="eyebrow">Saxophone</p>
+    <h1>Fingering Intuition</h1>
 
-    <div class="lw-tabs" role="tablist" aria-label="How It Works sections">
+    <div class="lw-tabs" role="tablist" aria-label="Fingering Intuition sections">
       ${TOC.map(t => `<button type="button" role="tab" class="lw-tab${t.id === activeId ? " is-active" : ""}"
         aria-selected="${t.id === activeId}" data-target="${t.id}">${t.label}</button>`).join("")}
     </div>

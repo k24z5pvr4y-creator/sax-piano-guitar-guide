@@ -44,7 +44,7 @@ export async function renderSaxScales(el, ctx) {
   const scalePcSet = new Set(scalePcs(state.root, scale));
 
   el.innerHTML = `<p class="eyebrow">Saxophone</p><h1>Scales</h1>
-    <p class="cap lw-crosslink"><a href="#/learn/how-it-works">Curious what's actually happening in these fingerings? →</a></p>
+    <p class="cap lw-crosslink"><a href="#/learn/how-it-works">Fingering Intuition →</a></p>
     <div class="controls sax-toggle">
       <div class="seg" id="axtog">
         <button aria-pressed="${state.instrument==='alto'}" data-ax="alto">Alto</button>

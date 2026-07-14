@@ -121,10 +121,12 @@ Layers:
 
 ## Per-view feature summary
 
-**How It Works** (`/learn/how-it-works`) — top-level cross-instrument primer,
-featured as a banner card on Home (above the instrument grid, not nested
-under Saxophone — it explicitly compares piano/guitar/sax so it doesn't
-belong to one instrument's section) plus small cross-links from Sax ▸
+**Fingering Intuition** (`/learn/how-it-works`, route name kept from the
+original build) — a Saxophone ▸ Fingering Intuition entry on Home (nested
+under Saxophone's card like Note Translator/Scales — it was originally a
+top-level Home banner comparing all three instruments, moved under
+Saxophone per user request since the app is a personal reference tool, not
+a product with marketing copy to feature) plus small cross-links from Sax ▸
 Translator and Sax ▸ Scales. Explains the physical mechanism behind sax
 fingerings (tube-shortening, the octave key, side/pinky/palm keys) and how
 the same "shorten the vibrating length, then reuse the shape an octave up"
@@ -133,7 +135,10 @@ pitch, no shortcut — you must relocate your hand). Originally drafted from a
 user-supplied source document explaining sax mechanics; rewritten in this
 app's own words (not copied) per the copyright rule above, and *corrected*
 against the real 91-entry fingering chart rather than trusting the source
-document's claims at face value.
+document's claims at face value. Copy throughout this page (and its
+cross-links) was later trimmed of marketing/enthusiasm-toned phrasing
+("Read this first", "Curious what's actually happening...") for the same
+reason — this is a lookup tool for one person, not a pitch to a user base.
 
 A one-line tab bar sits right below the lead paragraph — one tab per section
 (core idea, home row, octave key, transposition, chromatic fixes,

@@ -23,7 +23,7 @@ export const state = {
 // route -> { title, crumbs, render }
 const routes = {
   "/":                 { title: "Choose Instrument", crumbs: [],                            render: renderHome },
-  "/learn/how-it-works": { title: "How It Works",    crumbs: [],                            render: renderHowItWorks },
+  "/learn/how-it-works": { title: "Fingering Intuition", crumbs: ["Saxophone"],               render: renderHowItWorks },
   "/sax/translator":   { title: "Note Translator",   crumbs: ["Saxophone"],                 render: renderSaxTranslator },
   "/sax/scales":       { title: "Scales",            crumbs: ["Saxophone"],                 render: renderSaxScales },
   "/piano/scales":     { title: "Scales",            crumbs: ["Piano"],                     render: renderPianoScales },

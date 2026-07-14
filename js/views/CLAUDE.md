@@ -10,8 +10,8 @@ notes) and passed a syntax check while still being wrong on render.
 
 | File | Route | One-line scope |
 |---|---|---|
-| `home.js` | `/` | Instrument chooser + the How It Works featured banner |
-| `how-it-works.js` | `/learn/how-it-works` | Cross-instrument physics primer — pulls fingering cards live from `data/sax-fingerings.json`, doesn't hardcode any claim about a fingering |
+| `home.js` | `/` | Instrument chooser |
+| `how-it-works.js` | `/learn/how-it-works` | Saxophone ▸ Fingering Intuition — cross-instrument physics primer, pulls fingering cards live from `data/sax-fingerings.json`, doesn't hardcode any claim about a fingering |
 | `sax-translator.js` | `/sax/translator` | Full-range keyboard → click a note → cheapest fingering + alternates |
 | `sax-scales.js` | `/sax/scales` | Every A2–D6 written note in-scale, grouped by concert-root recurrence |
 | `piano-scales.js` | `/piano/scales` | Fixed 2-octave keyboard + diatonic triads list |

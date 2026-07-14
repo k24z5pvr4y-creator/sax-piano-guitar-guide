@@ -33,7 +33,7 @@ export async function renderSaxTranslator(el, { state }) {
   state.saxPressedMidi ??= null;
 
   el.innerHTML = `<p class="eyebrow">Saxophone</p><h1>Note Translator</h1>
-    <p class="cap lw-crosslink"><a href="#/learn/how-it-works">Wondering why lifting fingers raises pitch? →</a></p>
+    <p class="cap lw-crosslink"><a href="#/learn/how-it-works">Fingering Intuition →</a></p>
     <div class="controls sax-toggle">
       <div class="seg" id="axtog">
         <button aria-pressed="${state.instrument==='alto'}" data-ax="alto">Alto</button>
