@@ -250,6 +250,34 @@
 .lw-crosslink { margin: -8px 0 16px; }
 .lw-crosslink a { color: var(--tone-accent); text-decoration: none; }
 .lw-lead { font-size: 1.1rem; color: var(--ink-muted); max-width: 60ch; }
+.lw-toc {
+  margin-top: 24px;
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface-raised);
+}
+.lw-toc-label {
+  margin: 0 0 10px;
+  font-family: var(--font-ui);
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--ink-muted);
+}
+.lw-toc-list { display: flex; flex-wrap: wrap; gap: 8px; }
+.lw-toc-item {
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--tone-accent);
+  font-family: var(--font-ui);
+  font-size: 0.85rem;
+  padding: 8px 16px;
+  cursor: pointer;
+  text-align: left;
+}
+.lw-toc-item:hover { background: var(--tone-accent-light); }
 .lw-section { margin-top: 40px; padding-top: 24px; border-top: 1px solid var(--border); }
 .lw-section > p { max-width: 68ch; }
 .lw-subhead { margin-top: 28px; }

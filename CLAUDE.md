@@ -113,6 +113,19 @@ app's own words (not copied) per the copyright rule above, and *corrected*
 against the real 91-entry fingering chart rather than trusting the source
 document's claims at face value.
 
+A "Jump to" TOC panel sits right below the lead paragraph — one button per
+`<h2>` section (core idea, home row, octave key, transposition, chromatic
+fixes, variations, see-it-live), scrolling to that section's `id` via
+`scrollIntoView`. These are plain `<button>`s wired up with a single
+click-delegated listener scoped to the `.lw-toc` element, **not**
+`<a href="#core-idea">` anchors — the app's hash router treats any
+`location.hash` change as a route change (`app.js`'s `route()` falls back to
+`routes["/"]` for any hash it doesn't recognize and re-renders Home), so a
+real anchor link would blow away this page instead of scrolling within it.
+If you add a new `<h2>` section, add both its `id` and a matching entry to
+the `TOC` array in `how-it-works.js` — they're two separate lists kept in
+sync by hand, nothing enforces it structurally.
+
 Every fingering shown on this page is pulled live from
 `data/sax-fingerings.json` via the same `renderSaxCard`/`loadFingerings`
 helpers every other sax view uses — nothing here is a hand-typed claim about
