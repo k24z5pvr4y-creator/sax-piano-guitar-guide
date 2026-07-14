@@ -15,19 +15,41 @@
 // of the original six. describeFingerChange() (render/sax.js) computes this
 // live by diffing required[] against the finger map, so the page states the
 // true mechanism at each step instead of a smoothed-over story.
-import { loadFingerings, loadFingerMap, describeFingerChange, renderSaxCard } from "../render/sax.js";
+//
+// The palm-key and side-key filmstrips below were built the same way: rather
+// than assert a tidy story about which of the 24 key codes does what, each
+// example note was picked by actually grepping data/sax-fingerings.json for
+// the FIRST (lowest) note that requires a given code, so every one of the 24
+// codes is demonstrated by a real card at least once. Two codes (C5, Tf) were
+// simply absent from an earlier draft of this page because the example notes
+// picked at the time never happened to need them — not because the data
+// didn't have them.
+import { loadFingerings, loadFingerMap, describeFingerChange, renderSaxCard, fingeringsFor, variationLabel } from "../render/sax.js";
+import { writtenToConcertMidi, midiToName } from "../theory/pitch.js";
 
 const HOME_ROW_NOTES = ["D3", "E3", "F#3", "G3", "A3", "B3", "C#4"];
-const PINKY_NOTES = ["A2", "A#2", "B2", "C3"];
-const PALM_NOTES = ["D5", "E5", "F5"];
-const SIDE_KEY_CODES = new Set(["Ta", "Tc", "Tf", "X", "p"]);
+// Lowest note that requires each of the 6 left/right pinky-table codes (plus
+// the left-thumb LowA key, which rides along on the very lowest note): A2
+// (LowA + low C), A#2 (low Bb), B2 (low B), C#3 (low C#), D#3 (Eb), G#3 (G#).
+const PINKY_NOTES = ["A2", "A#2", "B2", "C#3", "D#3", "G#3"];
+// Lowest note that requires each of the 5 palm-key codes C1-C5, in the order
+// they're first needed climbing the top of the range: C1 at D5, C2 at D#5,
+// C3 at E5 (alongside C1), C4 at F5 (alongside C3), C5 at G5 (alongside the
+// side key X — the link to the side-keys section below).
+const PALM_NOTES = ["D5", "D#5", "E5", "F5", "G5"];
+// Three notes that between them require all 4 non-bis side-key codes: F#4
+// needs Tf, A5 needs Tc, and F#5 needs BOTH Ta and X together (the case that
+// makes the side-keys/palm-keys link concrete: two side keys firing at once).
+const SIDE_NOTES = ["F#4", "A5", "F#5"];
 
 export async function renderHowItWorks(el) {
   const [entries, keyToFinger] = await Promise.all([loadFingerings(), loadFingerMap()]);
   const byNote = new Map(entries.map(e => [e.note, e]));
-  const sideKeyExample = entries
-    .filter(e => !/-alt\d*$/.test(e.note))
-    .find(e => e.required.some(k => SIDE_KEY_CODES.has(k)));
+
+  const altoLow = midiToName(writtenToConcertMidi("D3", "alto"));
+  const altoHigh = midiToName(writtenToConcertMidi("D4", "alto"));
+  const tenorLow = midiToName(writtenToConcertMidi("D3", "tenor"));
+  const tenorHigh = midiToName(writtenToConcertMidi("D4", "tenor"));
 
   el.innerHTML = `
     <p class="eyebrow">Start here</p>
@@ -94,25 +116,101 @@ export async function renderHowItWorks(el) {
     </section>
 
     <section class="lw-section">
+      <h2>Same fingers, different pitch: why sax transposes</h2>
+      <p>Every fingering on this page so far has been described in terms of what's
+        <strong>written</strong> — the note printed on the part, and the note this whole
+        chart is organized by. That's deliberately not the same thing as the note that
+        actually comes out of the bell. The saxophone family (soprano, alto, tenor,
+        baritone) are built in different physical sizes, but they're pitched so that a
+        player who learns one fingering chart can pick up any of them and read the same
+        written part — "all six main keys down" always means the same shape, on every
+        horn, but that shape produces a different actual pitch depending on the horn's
+        size.</p>
+      <p>Alto is pitched in E♭: everything you play sounds a major sixth lower than
+        written. Tenor is pitched in B♭, a full octave-plus-a-step lower than written.
+        Take the very first fingering from the home row above — written D3, six main
+        fingers down, nothing else:</p>
+      <p class="cap lw-note">Written D3 sounds as concert <strong>${altoLow}</strong> on
+        alto, concert <strong>${tenorLow}</strong> on tenor. Add the octave key (written
+        D4) and both come out exactly one octave higher: concert
+        <strong>${altoHigh}</strong> / concert <strong>${tenorHigh}</strong> — same
+        fingering shape, same octave-key trick, just transposed.</p>
+      <p>This is why the fingering charts on this page and everywhere in this app are
+        written pitch, unaffected by the Alto/Tenor toggle — the shape you finger doesn't
+        change. What changes is which concert pitch it produces, and that's exactly what
+        the toggle recalculates. The piano keyboard, the guitar fretboard, and the Root
+        picker used for every scale in this app are all concert pitch instead, since
+        piano and guitar aren't transposing instruments — the conversion between the two
+        pitch systems happens at one boundary in the code
+        (<code>writtenToConcertMidi</code>), so nothing downstream has to think about it.
+        Try it directly: <a href="#/sax/translator">Sax ▸ Note Translator →</a> flips the
+        Alto/Tenor toggle without changing a single fingering.</p>
+    </section>
+
+    <section class="lw-section">
       <h2>Why it looks messy: the chromatic fixes</h2>
       <p>Ten fingers, twelve semitones per octave. The extra levers clustered around your
-        pinkies and palms exist to fill that gap without ever moving your hands off the home
-        row.</p>
+        pinkies, palm, and the side of your right hand exist to fill that gap without ever
+        moving your hands off the home row — three different clusters, each solving a
+        different part of the problem: the lowest notes, the highest notes, and quick
+        half-step alternates in between. They also lean on each other more than a tidy
+        diagram would suggest — see the note at the end of the side-keys section below.</p>
 
       <h3 class="lw-subhead">Pinky tables</h3>
-      <p>Your pinkies work spatula-shaped keys connected by long rods to the pads at the very
-        bottom of the bell — the mechanism behind the horn's lowest notes:</p>
+      <p>Your pinkies work spatula-shaped keys connected by long rods to pads at the very
+        bottom of the bell, for notes below what the home row's six main keys can reach.
+        The left pinky operates a table of four (G♯, low C♯, low B, low B♭); the right
+        pinky operates a table of two (low C, E♭). One note below demonstrates each of
+        those six keys, plus the left thumb's LowA key that rides along on the very
+        lowest note:</p>
       <div class="lw-filmstrip" id="pinkyDemo"></div>
 
       <h3 class="lw-subhead">Palm keys</h3>
-      <p>Near your left palm, a cluster of keys vents the very top of the tube to reach the
-        highest notes in the standard range:</p>
+      <p>Near your left palm, a cluster of keys vents the very top of the tube — you roll
+        your palm across them rather than pressing straight down, the same motion in every
+        method book. This app's data labels them C1 through C5, numbered in the order they
+        first get pulled in as you climb: C1 at D5, C2 at D♯5, C3 at E5, C4 at F5, C5 at
+        G5. That numbering is <em>not</em> a clean ladder where each key stacks on top of
+        the last, though — like the home row's B3/C♯4 register break above, the real chart
+        doesn't stay tidy. E5 needs C1 <em>and</em> C3 together; F5 swaps in C4 but keeps
+        C3; G5 drops the C1-C4 pattern entirely in favor of C5 plus a side key. The cards
+        below are the ground truth — don't assume a pattern climbing past what's actually
+        shown:</p>
       <div class="lw-filmstrip" id="palmDemo"></div>
 
       <h3 class="lw-subhead">Side keys</h3>
-      <p>Operated by the side of your right-hand fingers without leaving the home row, side
-        keys give quick half-step alternatives — like this one, for B♭:</p>
+      <p>Reachable by the side of your right-hand index and middle fingers without leaving
+        the home row, side keys serve two different jobs depending on register: down low
+        they're quick half-step alternates (see the B♭ example in the next section — its
+        default fingering uses one); up high, past the palm keys, they help reach notes the
+        palm keys alone can't. This app's data labels the ones demonstrated below Tf, Tc,
+        and Ta:</p>
       <div class="lw-filmstrip" id="sideDemo"></div>
+      <p class="cap lw-note">F#5 needs Ta and X <em>at the same time</em> — two side keys
+        firing together, not one. And G5 above, in the palm-keys section, needed a side key
+        (X) together with a palm key (C5): past a certain point in the range, these two
+        "separate" clusters stop being separate and start combining.</p>
+    </section>
+
+    <section class="lw-section">
+      <h2>One pitch, several fingerings</h2>
+      <p>Not every note has exactly one "correct" fingering. Written B♭3 is the sax's
+        most famous example — the real chart lists five different ways to play it, and
+        working saxophonists switch between them depending on what comes immediately
+        before and after: which one requires the least finger movement, which one speaks
+        more in tune in context, which one is physically possible in a fast passage. None
+        of the five is more "correct" than the others — they're trade-offs, not a primary
+        fingering plus four backups:</p>
+      <div class="lw-filmstrip" id="bbDemo"></div>
+      <p class="cap lw-note">Same pitch, five different key combinations — including one
+        that uses the left-hand "bis" key (labeled <code>p</code> in this app's data,
+        positioned between keys 1 and 2) and one that's really the pinky-table B♭ from the
+        chromatic-fixes section above, played with the full home-row grip on top.</p>
+      <p>This is exactly what Sax ▸ Note Translator's ranking does automatically: click a
+        note and it shows every alternate the chart has, cheapest-to-reach first based on
+        whatever you clicked before it. B♭ isn't unique in having alternates — it's just
+        the note with the most — but you'll find two or three on plenty of other notes
+        too. Try it live: <a href="#/sax/translator">Sax ▸ Note Translator →</a></p>
     </section>
 
     <section class="lw-section">
@@ -135,17 +233,21 @@ export async function renderHowItWorks(el) {
 
     <section class="lw-section">
       <p class="lw-takeaway">Stop thinking of the sax as a keyboard with a random layout.
-        It's a telescoping tube: your six main fingers set its basic length, your pinkies and
-        side keys make half-step adjustments to that length, and your thumb's octave key
-        reuses the whole shape one register higher. Once that clicks, the chart stops being
-        something to memorize and starts being something you can predict.</p>
+        It's a telescoping tube: your six main fingers set its basic length, your pinkies
+        and side keys make half-step adjustments to that length, your palm keys vent it for
+        the top of the range, and your thumb's octave key reuses the whole shape one
+        register higher. Some notes have more than one valid shape, and every shape means a
+        different actual pitch depending on which size of horn you're holding — but once
+        the tube-shortening idea clicks, the chart stops being something to memorize and
+        starts being something you can predict.</p>
     </section>`;
 
   renderHomeRowFilmstrip(el.querySelector("#homeRow"), byNote, keyToFinger);
   renderOctaveDemo(el.querySelector("#octaveDemo"), byNote);
   renderNoteList(el.querySelector("#pinkyDemo"), byNote, PINKY_NOTES);
-  renderNoteList(el.querySelector("#palmDemo"), byNote, PALM_NOTES);
-  if (sideKeyExample) renderNoteList(el.querySelector("#sideDemo"), byNote, [sideKeyExample.note]);
+  renderNoteList(el.querySelector("#palmDemo"), byNote, PALM_NOTES, { compact: true });
+  renderNoteList(el.querySelector("#sideDemo"), byNote, SIDE_NOTES, { compact: true });
+  renderVariationsFilmstrip(el.querySelector("#bbDemo"), entries, "A#3");
 }
 
 function renderHomeRowFilmstrip(host, byNote, keyToFinger) {
@@ -169,11 +271,22 @@ function renderOctaveDemo(host, byNote) {
   if (high) renderSaxCard(host, high, { topText: "D4", bottomText: "Middle register (+ octave key)" });
 }
 
-function renderNoteList(host, byNote, noteNames) {
-  host.className = "lw-filmstrip sax-strip";
+function renderNoteList(host, byNote, noteNames, { compact = false } = {}) {
+  host.className = "lw-filmstrip sax-strip" + (compact ? " compact" : "");
   for (const noteName of noteNames) {
     const entry = byNote.get(noteName);
     if (!entry) continue;
     renderSaxCard(host, entry, { topText: noteName, bottomText: `Keys: ${entry.required.join(" · ")}` });
   }
+}
+
+function renderVariationsFilmstrip(host, entries, baseNote) {
+  host.className = "lw-filmstrip sax-strip compact";
+  const variants = fingeringsFor(entries, baseNote);
+  variants.forEach((entry, i) => {
+    renderSaxCard(host, entry, {
+      topText: variationLabel(entry, i, variants.length),
+      bottomText: `Keys: ${entry.required.join(" · ")}`,
+    });
+  });
 }

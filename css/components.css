@@ -155,9 +155,13 @@
    horizontal scrolling (used on the Scales strip, which shows root-to-root). */
 .sax-strip.compact .sax-card img { height: 200px; }
 .sax-card { text-align: center; }
-.sax-card img { height: 320px; width: auto; display: block; }
+.sax-card img { height: 320px; width: auto; display: block; margin: 0 auto; }
 .sax-card.is-default { outline: 2px solid var(--tone-accent); border-radius: var(--radius); }
-.sax-card .cap { font: 0.75rem var(--font-mono); color: var(--ink-muted); margin-top: 4px; }
+/* overflow-wrap: without it, a long caption (e.g. How It Works' finger-change
+   captions) has no width to wrap against on a card whose width is otherwise
+   just "however wide the image happens to be", and blows out the flex row --
+   see .lw-filmstrip .sax-card below, which gives these cards a real width. */
+.sax-card .cap { font: 0.75rem var(--font-mono); color: var(--ink-muted); margin-top: 4px; overflow-wrap: break-word; }
 .sax-card .cap-top { margin: 0 0 4px; }
 .sax-toggle { margin-bottom: 16px; }   /* Alto / Tenor */
 /* click-to-cycle scale card */
@@ -250,6 +254,12 @@
 .lw-section > p { max-width: 68ch; }
 .lw-subhead { margin-top: 28px; }
 .lw-filmstrip { margin-top: 12px; }
+/* Fixed width (rather than the app-wide default of "as wide as the fingering
+   image happens to render") because this page's captions run much longer
+   than anywhere else .sax-card is used (translator/scales captions are a
+   handful of words; these can be full sentences) -- scoped to this page only
+   so Sax Translator/Scales keep their existing tight packing. */
+.lw-filmstrip .sax-card { width: 220px; }
 .lw-note { max-width: 68ch; }
 .lw-compare-grid {
   display: grid;
