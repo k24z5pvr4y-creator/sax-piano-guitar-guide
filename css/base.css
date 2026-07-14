@@ -48,7 +48,7 @@ select {
   padding: 0 8px;
   cursor: pointer;
 }
-button:focus-visible, a:focus-visible, select:focus-visible {
+button:focus-visible, a:focus-visible, select:focus-visible, #kbwrap:focus-visible {
   outline: 2px solid var(--tone-accent);
   outline-offset: 2px;
 }

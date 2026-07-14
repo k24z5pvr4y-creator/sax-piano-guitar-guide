@@ -65,35 +65,53 @@ export async function renderSaxScales(el, ctx) {
   fillScaleSelect(el.querySelector("#scaleSel"), scales, state, () => renderSaxScales(el, ctx));
 
   // Full written range, sorted by actual pitch (not string order — "A#2" <
-  // "B2" alphabetically is wrong musically), grouped by written octave.
+  // "B2" alphabetically is wrong musically), filtered to scale membership by
+  // CONCERT pitch class, then chunked into rows that each span one complete
+  // CONCERT octave of the scale, starting at the concert root. Grouping by
+  // written octave (the old approach) doesn't line up with musical octaves
+  // in concert pitch at all — sax is a transposing instrument, so a
+  // written-octave boundary falls at an arbitrary point in the concert
+  // scale depending on root/instrument. A new row starts every time the
+  // concert root recurs; whatever notes precede the first root occurrence
+  // in the fixed A2-D6 range form a single leading (partial) row.
+  const rootPc = parseNote(state.root).pc;
   const baseNotes = entries
     .filter(e => !/-alt\d*$/.test(e.note))
-    .map(e => ({ note: e.note, midi: parseNote(e.note).midi, octave: parseNote(e.note).octave }))
+    .map(e => ({ note: e.note, midi: parseNote(e.note).midi }))
     .sort((a, b) => a.midi - b.midi);
 
-  const byOctave = new Map();
+  const filtered = [];
   for (const n of baseNotes) {
     const concertPc = ((writtenToConcertMidi(n.note, state.instrument) % 12) + 12) % 12;
     if (!scalePcSet.has(concertPc)) continue;
-    if (!byOctave.has(n.octave)) byOctave.set(n.octave, []);
-    byOctave.get(n.octave).push(n.note);
+    filtered.push({ note: n.note, concertPc });
   }
+
+  const groups = [];
+  let current = [];
+  for (const n of filtered) {
+    if (n.concertPc === rootPc && current.length) {
+      groups.push(current);
+      current = [];
+    }
+    current.push(n.note);
+  }
+  if (current.length) groups.push(current);
 
   const strips = el.querySelector("#strips");
   strips.innerHTML = "";
   let prevReq = [];
-  const octaves = [...byOctave.keys()].sort((a, b) => a - b);
-  octaves.forEach((oct, i) => {
+  groups.forEach((notes, i) => {
     const heading = document.createElement("p");
     heading.className = "cap";
     heading.style.margin = i === 0 ? "0 0 4px" : "16px 0 4px";
-    heading.textContent = `Octave ${oct}`;
+    heading.textContent = `Octave ${i + 1}`;
     strips.appendChild(heading);
 
     const strip = document.createElement("div");
     strip.className = "sax-strip compact";
     strips.appendChild(strip);
-    for (const written of byOctave.get(oct)) {
+    for (const written of notes) {
       const concertName = midiToName(writtenToConcertMidi(written, state.instrument));
       const cands = rankByMovement(fingeringsFor(entries, written), prevReq);
       if (!cands.length) { renderOutOfRange(strip, concertName, written); continue; }

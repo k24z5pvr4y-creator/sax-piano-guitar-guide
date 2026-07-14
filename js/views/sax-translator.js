@@ -43,6 +43,10 @@ export async function renderSaxTranslator(el, { state }) {
   });
 
   const kbHost = el.querySelector("#kbwrap"), strip = el.querySelector("#strip");
+  // Focusable so arrow keys can drive it right after a click/tap selects a
+  // note (see onKey below, which calls kbHost.focus()) — a plain div isn't
+  // focusable by default, and focus never bubbles up from a clicked child.
+  kbHost.tabIndex = 0;
   const paintStrip = (concertMidi) => {
     const writtenName = midiToName(concertToWrittenMidi(concertMidi, state.instrument));
     const cands = rankByMovement(fingeringsFor(entries, writtenName));
@@ -61,6 +65,12 @@ export async function renderSaxTranslator(el, { state }) {
     }));
   };
 
+  const selectNote = (concertMidi) => {
+    state.saxPressedMidi = concertMidi;
+    paintKeyboard();
+    paintStrip(concertMidi);
+  };
+
   const paintKeyboard = () => {
     kbHost.innerHTML = "";
     renderKeyboard(kbHost, {
@@ -69,13 +79,30 @@ export async function renderSaxTranslator(el, { state }) {
       noteLabels: true,
       onKey: (concertMidi) => {
         if (!producibleSet.has(concertMidi)) return; // outside what the horn can play
-        state.saxPressedMidi = state.saxPressedMidi === concertMidi ? null : concertMidi;
-        paintKeyboard();
-        if (state.saxPressedMidi == null) { strip.innerHTML = `<p class="cap">Tap a key to see its fingering.</p>`; }
-        else paintStrip(state.saxPressedMidi);
+        kbHost.focus(); // lets arrow keys take over navigation right after this click/tap
+        if (state.saxPressedMidi === concertMidi) {
+          state.saxPressedMidi = null;
+          paintKeyboard();
+          strip.innerHTML = `<p class="cap">Tap a key to see its fingering.</p>`;
+        } else {
+          selectNote(concertMidi);
+        }
       }
     });
   };
+
+  // Arrow-key navigation once a note is selected: left/right step a whole
+  // tone (2 semitones), up/down a half tone (1 semitone), clamped to the
+  // instrument's producible concert range.
+  kbHost.addEventListener("keydown", (e) => {
+    const steps = { ArrowLeft: -2, ArrowRight: 2, ArrowUp: 1, ArrowDown: -1 };
+    const step = steps[e.key];
+    if (step === undefined || state.saxPressedMidi == null) return;
+    e.preventDefault();
+    const next = Math.min(highMidi, Math.max(lowMidi, state.saxPressedMidi + step));
+    if (next !== state.saxPressedMidi && producibleSet.has(next)) selectNote(next);
+  });
+
   paintKeyboard();
   if (state.saxPressedMidi != null) paintStrip(state.saxPressedMidi);
 }

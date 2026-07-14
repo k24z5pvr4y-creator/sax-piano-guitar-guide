@@ -75,8 +75,8 @@ polluting the shared shape above:
   keyboard above it stayed scale-filtered and looked frozen/stuck.
 - `saxPressedMidi` — Sax ▸ Translator's single selected key.
   Sax ▸ Scales has no octave-picker state anymore — it shows the complete
-  written range (A2–D6) at once, grouped into rows by written octave; see
-  "Sax Scales" below.
+  written range (A2–D6) at once, grouped into rows by CONCERT octave (a new
+  row starts every time the concert root recurs); see "Sax Scales" below.
 
 Each view module exports `render<Name>(el, { state, navigate })` and mounts
 into `#view`.
@@ -105,16 +105,47 @@ concert pitch, sharps only); a key only turns orange when clicked (no default
 scale fill). Clicking shows the movement-cheapest fingering plus all
 alternates, captioned with friendly `"<note> Variation N"` labels — never a
 raw JSON id like `C#4-alt2`. Alto/Tenor toggle changes the concert mapping.
+After clicking/tapping a note, arrow keys move the selection: Left/Right
+step a whole tone (±2 semitones), Up/Down a half tone (±1 semitone), clamped
+to the instrument's producible range (verified gapless — every semitone
+between the alto/tenor concert floor and ceiling has a fingering, so no
+"land on a hole" case to handle). This only moves which note is selected —
+it doesn't change any other behavior (no auto-play, no state beyond
+`saxPressedMidi`). Implemented by making `#kbwrap` focusable (`tabIndex = 0`)
+and calling `.focus()` on it inside the click handler, rather than a
+global/document keydown listener — the router has no view-unmount hook
+(`viewEl.innerHTML = ""` just clears DOM), so a document-level listener
+would leak across navigations and stack up on repeat visits. A listener
+scoped to `#kbwrap` itself is torn down for free when that element is
+cleared from the DOM. Its focus ring reuses the app's existing
+`:focus-visible` treatment (`base.css`) rather than a bespoke style.
 
 **Sax ▸ Scales** (`/sax/scales`) — Root + Scale + Alto/Tenor controls, no
 octave picker. Shows **every** written note in the fingering chart's complete
 range (A2–D6, all 42 base written notes — same range regardless of
 instrument, since the fingering diagrams are written-pitch and
 instrument-independent) whose CONCERT pitch class belongs to the current
-scale, grouped into rows by written octave (2 through 6), each its own line
-with an "Octave N" heading. Cards show written (sax) notation on top, concert
-pitch on the bottom; click a card to cycle its alternates; the movement-cost
-chain (`rankByMovement`) continues across octave rows.
+scale, grouped into rows that each span one complete CONCERT octave of the
+scale: a new row starts every time the concert root recurs, each with a
+sequential "Octave N" heading (N is a row counter, not a literal octave
+number — see below for why). Whatever notes precede the first root
+occurrence in the fixed range form a single leading partial row. Cards show
+written (sax) notation on top, concert pitch on the bottom; click a card to
+cycle its alternates; the movement-cost chain (`rankByMovement`) continues
+across octave rows.
+
+Grouping by written octave (what this used to do) doesn't line up with
+musical octaves in concert pitch at all, since sax is a transposing
+instrument — a written-octave boundary falls at an arbitrary point in the
+concert scale depending on root/instrument, so a heading like "Octave 3"
+could contain concert notes spanning parts of two different real octaves.
+Grouping by concert-root recurrence instead means each non-leading row is a
+genuine, complete octave of the scale as actually heard. The heading number
+is a plain row counter (1, 2, 3, …) rather than the concert MIDI octave,
+because the leading partial row and the first full row can land in the same
+concert octave number (e.g. root A: leading row C2–G2, next row A2–G3 — both
+technically "octave 2" in scientific pitch notation), which would make
+literal octave numbers repeat and read as a bug.
 
 This replaced an earlier "exactly one octave, root up to the next occurrence
 of the root" design (plus an Octave + Octaves-shown picker to stack several
