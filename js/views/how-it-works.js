@@ -74,9 +74,6 @@ export async function renderHowItWorks(el, { state } = {}) {
   el.innerHTML = `
     <p class="eyebrow">Start here</p>
     <h1>How It Works</h1>
-    <p class="lw-lead">Fingering charts look like arbitrary lookup tables until you see the
-      mechanism behind them. Once it clicks, you stop memorizing 91 individual pictures and
-      start recognizing a handful of physical moves.</p>
 
     <div class="lw-tabs" role="tablist" aria-label="How It Works sections">
       ${TOC.map(t => `<button type="button" role="tab" class="lw-tab${t.id === activeId ? " is-active" : ""}"
@@ -254,17 +251,6 @@ export async function renderHowItWorks(el, { state } = {}) {
           <p>See a whole scale laid out as a sequence of fingerings, grouped by octave.</p>
         </a>
       </div>
-    </section>
-
-    <section class="lw-section">
-      <p class="lw-takeaway">Stop thinking of the sax as a keyboard with a random layout.
-        It's a telescoping tube: your six main fingers set its basic length, your pinkies
-        and side keys make half-step adjustments to that length, your palm keys vent it for
-        the top of the range, and your thumb's octave key reuses the whole shape one
-        register higher. Some notes have more than one valid shape, and every shape means a
-        different actual pitch depending on which size of horn you're holding — but once
-        the tube-shortening idea clicks, the chart stops being something to memorize and
-        starts being something you can predict.</p>
     </section>`;
 
   el.querySelector(".lw-tabs").addEventListener("click", (ev) => {

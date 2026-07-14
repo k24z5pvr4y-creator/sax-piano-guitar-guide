@@ -10,6 +10,28 @@ Read `docs/app-cosmetic-adjustments.md` alongside this file — it's the
 authoritative cosmetic spec and reflects several rounds of user-driven design
 iteration (colors, layout, notation conventions) since the original build.
 
+## Folder map
+
+Every subfolder has its own `CLAUDE.md` scoped to just that folder — read
+this root file for the full picture, then the relevant subfolder file for
+fast orientation without re-reading everything above. None of them duplicate
+this file; they point back to it for context and only state what's local to
+that folder.
+
+```
+js/CLAUDE.md                  router, state, layering rule (theory/render/views)
+js/theory/CLAUDE.md           pure pitch/scale/chord math, the "two chord systems" gotcha
+js/render/CLAUDE.md           per-renderer sharp edges (keyboard/fretboard/chordbox/sax/noteColors)
+js/views/CLAUDE.md            route → view file table
+css/CLAUDE.md                 tokens/base/components split, dark-mode + touch-target rules
+data/CLAUDE.md                JSON schema per file, what's safe to hand-edit
+assets/CLAUDE.md              top-level asset map
+assets/fingerings/CLAUDE.md   generated PNGs — do not hand-edit, how to regenerate
+assets/icons/CLAUDE.md        PWA icons — still missing, tracked gap
+docs/CLAUDE.md                what the cosmetic spec and flowchart files are
+tools/CLAUDE.md               the PNG-generation build script
+```
+
 ## Ground rules
 
 - **No backend, no persistence.** It's a reference/lookup tool. Don't add
@@ -137,9 +159,7 @@ recognize and re-renders Home), so a real anchor link would blow away this
 page instead of switching tabs. If you add a new `<h2>` section, add both
 its `id`+`hidden` on the `<section>` and a matching entry to the `TOC` array
 in `how-it-works.js` — they're two separate lists kept in sync by hand,
-nothing enforces it structurally. The closing "takeaway" section at the
-bottom has no tab and is not part of this system — it stays visible under
-every tab as a persistent closing summary.
+nothing enforces it structurally.
 
 Every fingering shown on this page is pulled live from
 `data/sax-fingerings.json` via the same `renderSaxCard`/`loadFingerings`

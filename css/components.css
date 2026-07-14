@@ -249,7 +249,6 @@
 .lw-hero p:last-child { margin: 0; color: var(--ink); }
 .lw-crosslink { margin: -8px 0 16px; }
 .lw-crosslink a { color: var(--tone-accent); text-decoration: none; }
-.lw-lead { font-size: 1.1rem; color: var(--ink-muted); max-width: 60ch; }
 /* One line of tabs, never wrapping — scrolls horizontally instead on
    viewports too narrow to fit all 7 (kept to its own scroll container per
    the app's overflow rule, not the page). Only the matching .lw-section
@@ -299,13 +298,6 @@
   gap: var(--gap);
   margin-top: 14px;
 }
-.lw-takeaway {
-  font-family: var(--font-display);
-  font-size: 1.25rem;
-  max-width: 60ch;
-  line-height: 1.5;
-}
-
 /* --- theme toggle (icon only, currentColor SVG, no emoji/text) --- */
 .theme-toggle { background: transparent; border: 0; color: var(--ink); padding: 8px; }
 .theme-toggle svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 2; }
