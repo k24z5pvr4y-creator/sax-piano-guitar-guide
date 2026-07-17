@@ -287,7 +287,21 @@ toggle. "Chords in scale" is triads-only (see "Two chord systems" below), so
 it always renders on the fixed one-octave window (C4–B4) with the
 chord's PITCH-CLASS set folded into that octave — same convention the scale
 views already use. "All chords"' `triad`-tier cards use that same one-octave
-fold too. Cards wrap (`flex-wrap`) instead of scrolling sideways.
+fold too. Cards wrap (`flex-wrap`) instead of scrolling sideways. These
+compact (non-wide) cards pass `whiteKeyWidth: COMPACT_KEY_WIDTH` (30) to
+`renderKeyboard` explicitly, rather than relying on the app's 44px default —
+`.chord-card-piano`'s frame (min-width 236px in `components.css`) is sized
+for a 30px key, not 44px. This used to be attempted the other way around
+(a `.chord-card-piano .pkey.white { flex-basis: 30px }` CSS rule), which was
+silently dead: `keyboard.js` sets each key's width as an **inline style**,
+which always wins over any external stylesheet rule regardless of
+specificity, so that CSS rule never took effect and every compact card
+actually rendered at the 44px default (~308px) inside its ~232px frame —
+overflowing and visibly overlapping the next card. Reproduced most clearly
+on iPad Safari (a user report), where the card's shrink-to-fit sizing didn't
+expand to absorb the overflow the way it happened to elsewhere. If you ever
+need a non-default key size anywhere in the app, pass `whiteKeyWidth`
+through JS — don't add a CSS override targeting `.pkey`, it can't win.
 
 **`seventh`/`extended`-tier cards in "All chords" are the exception:** these
 get a real 2-octave window anchored on the chord's own root (`rootMidi` to

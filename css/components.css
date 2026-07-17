@@ -188,11 +188,16 @@
    flex-shrink:0 + overflow-x:visible stop the flex row from squashing the
    keyboard into its own internal scrollbar (its nested .keyboard has
    overflow-x:auto, which reports a ~0 min-content width to the flex sizing
-   algorithm and otherwise lets the card collapse below the keys' real width). */
-.chord-card-piano { flex: 0 0 auto; min-width: 232px; }
+   algorithm and otherwise lets the card collapse below the keys' real width).
+   Key width itself is NOT set here — piano-chords.js passes an explicit
+   whiteKeyWidth (COMPACT_KEY_WIDTH, 30) to renderKeyboard. keyboard.js sets
+   each key's width as an inline style, which always overrides any rule
+   written here regardless of specificity, so a .pkey.white/.pkey.black
+   override in this file would be silently dead — it shipped that way once
+   already (cards rendered at the 44px default and visibly overflowed this
+   card's frame into the next one, most visible on iPad Safari). */
+.chord-card-piano { flex: 0 0 auto; min-width: 236px; }
 .chord-card-piano .keyboard { overflow-x: visible; }
-.chord-card-piano .pkey.white { flex-basis: 30px; }
-.chord-card-piano .pkey.black { width: 19px; }
 
 /* Seventh/extended-tier cards (piano-chords.js) get a real 2-octave window
    instead of the 1-octave fold above. Key width there is set from JS
