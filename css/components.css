@@ -185,28 +185,38 @@
 
 /* Piano ▸ Chords cards: a one-octave mini-keyboard, not interactive (no
    onKey), so it can safely go below the 44px touch-target minimum here.
-   flex-shrink:0 + overflow-x:visible stop the flex row from squashing the
-   keyboard into its own internal scrollbar (its nested .keyboard has
-   overflow-x:auto, which reports a ~0 min-content width to the flex sizing
-   algorithm and otherwise lets the card collapse below the keys' real width).
-   Key width itself is NOT set here — piano-chords.js passes an explicit
-   whiteKeyWidth (COMPACT_KEY_WIDTH, 30) to renderKeyboard. keyboard.js sets
-   each key's width as an inline style, which always overrides any rule
-   written here regardless of specificity, so a .pkey.white/.pkey.black
-   override in this file would be silently dead — it shipped that way once
-   already (cards rendered at the 44px default and visibly overflowed this
-   card's frame into the next one, most visible on iPad Safari). */
-.chord-card-piano { flex: 0 0 auto; min-width: 236px; }
+   `width` (not `min-width`) is a hard requirement, not a style choice: the
+   nested .keyboard is a block-level flex container, so it stretches to
+   whatever width .chord-card-piano resolves to; its actual key elements
+   (flex-shrink:0, so they never shrink below their real px size) then
+   overflow THAT resolved width whenever it's smaller than the keys' true
+   total. With `min-width` + `flex: 0 0 auto`, the card's own shrink-to-fit
+   sizing does not reliably grow to absorb that overflow — verified with a
+   real WebKit/iPad-viewport measurement, where the card sat pinned at its
+   min-width floor while the keys visibly spilled out past the card's own
+   border into the next card (89px overflow on this one-octave tier; even
+   the 2-octave tier below, which looked fine at a glance, measured a
+   smaller-but-real 21px overflow the same way). A `flex-basis: auto` item's
+   hypothetical size resolves from its `width` property when one is set, so
+   an explicit fixed `width` here — sized to actually fit 7 keys at the
+   default 44px (7*44 + 2*12 padding + 2*1 border = 334px) — sidesteps that
+   shrink-to-fit computation entirely instead of trying to out-tune it, and
+   renders identically (44px keys, same as before) on every engine. Do NOT
+   go back to `min-width` here or try to shrink the keys via a `.pkey.white`
+   CSS override to compensate — the latter is separately dead anyway, since
+   keyboard.js sets each key's width as an inline style, which always beats
+   any rule written here regardless of specificity. */
+.chord-card-piano { flex: 0 0 auto; width: 334px; }
 .chord-card-piano .keyboard { overflow-x: visible; }
 
 /* Seventh/extended-tier cards (piano-chords.js) get a real 2-octave window
    instead of the 1-octave fold above. Key width there is set from JS
-   (renderKeyboard's whiteKeyWidth) to land on the same total footprint as
-   the 1-octave cards, so it tiles in .chord-row without overlapping its
-   neighbors; height has no JS option, so it's shrunk here to keep the taller
-   aspect ratio of a wider keyboard from standing out next to the 1-octave
-   cards in the same row. */
-.chord-card-piano-wide { min-width: 300px; }
+   (renderKeyboard's whiteKeyWidth, 22px) to land on the same 308px content
+   footprint as the 1-octave cards (14*22 == 7*44), so this tier needs no
+   width override of its own — it inherits the same fixed 334px from
+   `.chord-card-piano` above. Height has no JS option, so it's shrunk here
+   to keep the taller aspect ratio of a wider keyboard from standing out
+   next to the 1-octave cards in the same row. */
 .chord-card-piano-wide .keyboard { height: 110px; }
 
 /* --- GUITAR CHORD-BOX DIAGRAM ------------------------------------------------

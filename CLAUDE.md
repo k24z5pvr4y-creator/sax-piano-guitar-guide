@@ -287,21 +287,35 @@ toggle. "Chords in scale" is triads-only (see "Two chord systems" below), so
 it always renders on the fixed one-octave window (C4–B4) with the
 chord's PITCH-CLASS set folded into that octave — same convention the scale
 views already use. "All chords"' `triad`-tier cards use that same one-octave
-fold too. Cards wrap (`flex-wrap`) instead of scrolling sideways. These
-compact (non-wide) cards pass `whiteKeyWidth: COMPACT_KEY_WIDTH` (30) to
-`renderKeyboard` explicitly, rather than relying on the app's 44px default —
-`.chord-card-piano`'s frame (min-width 236px in `components.css`) is sized
-for a 30px key, not 44px. This used to be attempted the other way around
-(a `.chord-card-piano .pkey.white { flex-basis: 30px }` CSS rule), which was
-silently dead: `keyboard.js` sets each key's width as an **inline style**,
-which always wins over any external stylesheet rule regardless of
-specificity, so that CSS rule never took effect and every compact card
-actually rendered at the 44px default (~308px) inside its ~232px frame —
-overflowing and visibly overlapping the next card. Reproduced most clearly
-on iPad Safari (a user report), where the card's shrink-to-fit sizing didn't
-expand to absorb the overflow the way it happened to elsewhere. If you ever
-need a non-default key size anywhere in the app, pass `whiteKeyWidth`
-through JS — don't add a CSS override targeting `.pkey`, it can't win.
+fold too. Cards wrap (`flex-wrap`) instead of scrolling sideways, at the
+app's default 44px key width — unchanged from the original design.
+
+**`.chord-card-piano` needs a fixed `width`, not `min-width` + auto-sizing —
+this shipped broken once and the fix matters if you ever touch this CSS.**
+The nested `.keyboard` is a block-level flex container, so it always
+stretches to fill whatever width `.chord-card-piano` resolves to; its key
+elements (`flex-shrink: 0`, so they never shrink below their real px size)
+then overflow that resolved width whenever it's narrower than the keys'
+true total. With the original `min-width: 232px` + `flex: 0 0 auto`, the
+card's own shrink-to-fit sizing did not reliably grow to absorb that
+overflow — measured directly on real WebKit at an iPad viewport (a user
+report), the card sat pinned at its `min-width` floor while the keys
+visibly spilled out past the card's own border into the next card: 89px of
+overflow on this one-octave tier, and even the 2-octave seventh/extended
+tier below (which looked fine at a glance) measured a smaller-but-real 21px
+overflow the same way. A `flex-basis: auto` item's hypothetical size
+resolves from its `width` property when one is set, so giving
+`.chord-card-piano` an explicit fixed `width` (334px — enough for 7 keys at
+44px plus padding/border) sidesteps that shrink-to-fit computation entirely
+instead of trying to out-tune it, and renders identically on every engine.
+**Do not "fix" this by shrinking the key width instead** (e.g. passing a
+smaller `whiteKeyWidth` from `piano-chords.js`, or a `.chord-card-piano
+.pkey.white` CSS override) — that was tried first, worked around the
+overflow by making the keys small enough to fit inside the old floor, and
+visibly shrank every card on desktop too, since key width isn't scoped by
+viewport anywhere in this app. (A CSS override wouldn't have worked anyway:
+`keyboard.js` sets each key's width as an **inline style**, which always
+wins over any external stylesheet rule regardless of specificity.)
 
 **`seventh`/`extended`-tier cards in "All chords" are the exception:** these
 get a real 2-octave window anchored on the chord's own root (`rootMidi` to
@@ -320,9 +334,10 @@ inside the renderer — `piano-chords.js` computes them
 (`chord.intervals.map(iv => rootMidi + iv)`) and hands them to
 `renderKeyboard`, keeping `keyboard.js` theory-free per the layering rule.
 `WIDE_KEY_WIDTH` (22px) is tuned so a 14-white-key 2-octave board lands on
-the same total footprint as a 7-white-key 1-octave card at the app's default
-44px — matters because both tiers' cards sit in the same wrapping
-`.chord-row` and must not visually overlap. Widest chord here (a 13th, 21
+the same 308px content footprint as a 7-white-key 1-octave card at the
+app's default 44px (14×22 == 7×44) — this is what lets `.chord-card-piano`'s
+single fixed `width` (334px, see above) fit both tiers without a separate
+override for the wide one. Widest chord here (a 13th, 21
 semitones) fits comfortably inside the 24-semitone (2-octave) window from
 any root — verified numerically, not just by eye, since a black-key root
 (e.g. F#) makes `keyboard.js`'s anchor-based black-key placement the

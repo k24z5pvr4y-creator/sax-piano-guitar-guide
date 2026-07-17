@@ -30,20 +30,6 @@ const WIN_LOW = parseNote("C4").midi, WIN_HIGH = parseNote("B4").midi; // one oc
 const WIDE_TIERS = new Set(["seventh", "extended"]);
 const WIDE_KEY_WIDTH = 22; // 14 white keys * 22px ~= 7 white keys * 44px: same footprint as the 1-octave cards, so nothing overlaps in the wrapping row
 
-// Compact (1-octave, pitch-class-folded) cards need a narrower key than the
-// app's 44px default so the keyboard's real rendered width fits inside
-// .chord-card-piano's frame (min-width 236px in components.css). This MUST
-// be passed to renderKeyboard's whiteKeyWidth option, not set via a CSS rule
-// targeting .pkey.white/.pkey.black — keyboard.js sets each key's width as
-// an inline style, which always wins over any external stylesheet rule
-// regardless of specificity, so a CSS-only shrink attempt is silently dead.
-// That's exactly what shipped before this fix: the cards rendered at the
-// 44px default, ~308px wide, overflowing their ~232px card frame and
-// visibly overlapping the next card — reproduced on iPad Safari, where the
-// card's shrink-to-fit sizing doesn't expand to absorb the overflowing
-// content the way it happens to elsewhere.
-const COMPACT_KEY_WIDTH = 30;
-
 export async function renderPianoChords(el, ctx) {
   const { state } = ctx;
   const chordData = await loadChords();
@@ -94,8 +80,7 @@ export async function renderPianoChords(el, ctx) {
             chordMidis, rootMidi, pressed: new Set(), whiteKeyWidth: WIDE_KEY_WIDTH });
         } else {
           renderKeyboard(card, { lowMidi: WIN_LOW, highMidi: WIN_HIGH, rootPc,
-            scalePcs: new Set(pcSet(rootPc, chord.intervals)), pressed: new Set(),
-            whiteKeyWidth: COMPACT_KEY_WIDTH });
+            scalePcs: new Set(pcSet(rootPc, chord.intervals)), pressed: new Set() });
         }
         row.appendChild(card);
       }
@@ -116,8 +101,7 @@ export async function renderPianoChords(el, ctx) {
       const card = document.createElement("div"); card.className = "chord-card chord-card-piano";
       card.innerHTML = `<h4><span class="roman">${t.roman}</span> ${t.rootName.replace(/\d+$/, "")}</h4>`;
       renderKeyboard(card, { lowMidi: WIN_LOW, highMidi: WIN_HIGH, rootPc: degRootPc,
-        scalePcs: new Set(t.notes.map(n => ((n.midi % 12) + 12) % 12)), pressed: new Set(),
-        whiteKeyWidth: COMPACT_KEY_WIDTH });
+        scalePcs: new Set(t.notes.map(n => ((n.midi % 12) + 12) % 12)), pressed: new Set() });
       row.appendChild(card);
     });
   }
